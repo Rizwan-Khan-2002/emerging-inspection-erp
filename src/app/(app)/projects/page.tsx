@@ -1,0 +1,64 @@
+import { FolderKanban } from "lucide-react";
+import { PageHeader } from "@/components/common/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
+import { AddProject } from "@/components/projects/add-project";
+import { getClients, getProjects } from "@/lib/data";
+import { formatDate, formatSAR } from "@/lib/format";
+import type { BadgeTone } from "@/lib/constants";
+
+export const metadata = { title: "Projects · Emerging ERP" };
+
+const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
+  planning: { label: "Planning", tone: "info" },
+  active: { label: "Active", tone: "success" },
+  on_hold: { label: "On Hold", tone: "warning" },
+  completed: { label: "Completed", tone: "neutral" },
+};
+
+export default async function ProjectsPage() {
+  const [projects, clients] = await Promise.all([getProjects(), getClients()]);
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Projects" description="Shutdowns, contracts and ongoing engagements.">
+        <AddProject clients={clients.map((c) => ({ id: c.id, company_name: c.company_name }))} />
+      </PageHeader>
+      {projects.length === 0 ? (
+        <EmptyState icon={<FolderKanban />} title="No projects yet" description="Create your first project to get started." />
+      ) : (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {projects.map((p) => (
+          <Card key={p.id} className="transition-colors hover:border-accent/40">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                  <FolderKanban className="size-4" />
+                </span>
+                <Badge tone={STATUS[p.status].tone}>{STATUS[p.status].label}</Badge>
+              </div>
+              <CardTitle className="mt-2">{p.name}</CardTitle>
+              <p className="text-sm text-muted">{p.client_name}</p>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <Row label="Site" value={p.site_location ?? "—"} />
+              <Row label="Start" value={formatDate(p.start_date)} />
+              <Row label="End" value={formatDate(p.end_date)} />
+              <Row label="Budget" value={p.budget ? formatSAR(p.budget, { compact: true }) : "—"} accent />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      )}
+    </div>
+  );
+}
+
+function Row({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-steel-dim">{label}</span>
+      <span className={accent ? "font-semibold text-accent" : "text-steel"}>{value}</span>
+    </div>
+  );
+}

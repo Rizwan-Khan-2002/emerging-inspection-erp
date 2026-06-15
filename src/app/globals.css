@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/*
+  EMERGING INSPECTION ERP — Industrial Design System
+  Premium Saudi industrial corporate UI: dark navy + safety orange.
+*/
+
+@theme {
+  /* Brand palette */
+  --color-navy: #071827;
+  --color-navy-700: #0a2033;
+  --color-navy-600: #0d273e;
+  --color-card: #102437;
+  --color-card-hover: #14304a;
+  --color-accent: #ff7a00;
+  --color-accent-hover: #ff9128;
+  --color-accent-soft: #2a1c0d;
+  --color-steel: #aab6c2;
+  --color-steel-dim: #6b7c8d;
+
+  /* Semantic tokens */
+  --color-background: #071827;
+  --color-foreground: #ffffff;
+  --color-muted: #8a98a8;
+  --color-border: #1c3650;
+  --color-ring: #ff7a00;
+
+  /* Status colors */
+  --color-success: #2dd47f;
+  --color-warning: #f5b300;
+  --color-danger: #ff5470;
+  --color-info: #3aa0ff;
+
+  /* Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --background: #071827;
+  --foreground: #ffffff;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+/* ----------------------------- Light theme ------------------------------- */
+/* next-themes adds `.light` / `.dark` on <html>. Default is dark; these
+   overrides remap the surface tokens for day mode. Accent stays orange. */
+html.light {
+  color-scheme: light;
+  --color-navy: #eef2f7;
+  --color-navy-700: #ffffff;
+  --color-navy-600: #e6ecf3;
+  --color-card: #ffffff;
+  --color-card-hover: #f1f5f9;
+  --color-accent-soft: #fff1e3;
+  --color-steel: #44566a;
+  --color-steel-dim: #758799;
+  --color-background: #f4f7fb;
+  --color-foreground: #0e1b2a;
+  --color-muted: #586b7e;
+  --color-border: #dde5ee;
+  --color-success: #1f9d57;
+  --color-warning: #b5740a;
+  --color-danger: #d83a54;
+  --color-info: #2563eb;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle industrial backdrop gradient */
+.app-shell-bg {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(255, 122, 0, 0.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(58, 160, 255, 0.05), transparent 60%),
+    var(--color-background);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c3650;
+  border-radius: 8px;
+  border: 2px solid var(--color-background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a4a6b;
+}
+
+/* Focus visibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}

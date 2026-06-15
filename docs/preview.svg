@@ -1,0 +1,126 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071827"/>
+      <stop offset="1" stop-color="#0a2033"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff7a00"/>
+      <stop offset="1" stop-color="#ff9128"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="100%" cy="0%" r="80%">
+      <stop offset="0" stop-color="#ff7a00" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#ff7a00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow)"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="240" height="675" fill="#071827" opacity="0.6"/>
+  <line x1="240" y1="0" x2="240" y2="675" stroke="#1c3650" stroke-width="1"/>
+  <!-- logo -->
+  <rect x="24" y="26" width="34" height="34" rx="8" fill="#ffffff"/>
+  <text x="41" y="49" fill="#071827" font-size="15" font-weight="800" text-anchor="middle">EI</text>
+  <text x="70" y="42" fill="#ffffff" font-size="14" font-weight="800" letter-spacing="1">EMERGING</text>
+  <text x="70" y="56" fill="#ff7a00" font-size="8" font-weight="600" letter-spacing="2">INSPECTION ERP</text>
+
+  <!-- nav items -->
+  <g font-size="13" fill="#aab6c2">
+    <rect x="14" y="92" width="212" height="34" rx="8" fill="#ff7a00" opacity="0.15"/>
+    <text x="44" y="114" fill="#ff7a00" font-weight="600">Dashboard</text>
+    <text x="44" y="158">Leads CRM</text>
+    <text x="44" y="192">Clients</text>
+    <text x="44" y="226">Quotations</text>
+    <text x="44" y="260">Invoices</text>
+    <text x="44" y="300">Inspections</text>
+    <text x="44" y="334">Reports</text>
+    <text x="44" y="368">Field Ops</text>
+    <text x="44" y="408">Employees</text>
+    <text x="44" y="442">Attendance</text>
+    <text x="44" y="476">Payroll</text>
+    <text x="44" y="516">Vehicles</text>
+    <text x="44" y="550">Fuel Expenses</text>
+  </g>
+  <g fill="#6b7c8d">
+    <circle cx="28" cy="109" r="3" fill="#ff7a00"/>
+    <circle cx="28" cy="153" r="3"/><circle cx="28" cy="187" r="3"/><circle cx="28" cy="221" r="3"/>
+    <circle cx="28" cy="255" r="3"/><circle cx="28" cy="295" r="3"/><circle cx="28" cy="329" r="3"/>
+    <circle cx="28" cy="363" r="3"/><circle cx="28" cy="403" r="3"/><circle cx="28" cy="437" r="3"/>
+    <circle cx="28" cy="471" r="3"/><circle cx="28" cy="511" r="3"/><circle cx="28" cy="545" r="3"/>
+  </g>
+
+  <!-- Topbar -->
+  <rect x="240" y="0" width="960" height="64" fill="#071827" opacity="0.55"/>
+  <line x1="240" y1="64" x2="1200" y2="64" stroke="#1c3650"/>
+  <rect x="272" y="18" width="380" height="30" rx="8" fill="#0a2033" stroke="#1c3650"/>
+  <text x="292" y="38" fill="#6b7c8d" font-size="12">Search leads, inspections, employees…</text>
+  <circle cx="1090" cy="32" r="14" fill="#0a2033" stroke="#1c3650"/>
+  <circle cx="1140" cy="32" r="16" fill="#ff7a00" opacity="0.2"/>
+  <text x="1140" y="37" fill="#ff7a00" font-size="11" font-weight="700" text-anchor="middle">RK</text>
+
+  <!-- Heading -->
+  <text x="280" y="112" fill="#ffffff" font-size="26" font-weight="700">Welcome, Rizwan</text>
+  <text x="280" y="136" fill="#8a98a8" font-size="13">Super Admin workspace</text>
+  <rect x="1052" y="96" width="116" height="26" rx="13" fill="#2dd47f" opacity="0.12"/>
+  <circle cx="1070" cy="109" r="3" fill="#2dd47f"/>
+  <text x="1082" y="113" fill="#2dd47f" font-size="11">All systems operational</text>
+
+  <!-- Stat cards -->
+  <g>
+    <rect x="280" y="160" width="206" height="104" rx="14" fill="#102437" stroke="#1c3650"/>
+    <text x="300" y="188" fill="#6b7c8d" font-size="10" letter-spacing="1">TOTAL LEADS</text>
+    <text x="300" y="224" fill="#ffffff" font-size="30" font-weight="700">128</text>
+    <rect x="440" y="176" width="34" height="34" rx="8" fill="#ff7a00" opacity="0.12"/>
+
+    <rect x="500" y="160" width="206" height="104" rx="14" fill="#102437" stroke="#ff7a00" stroke-opacity="0.4"/>
+    <text x="520" y="188" fill="#6b7c8d" font-size="10" letter-spacing="1">MONTHLY REVENUE</text>
+    <text x="520" y="224" fill="#ff7a00" font-size="30" font-weight="700">489k</text>
+    <rect x="660" y="176" width="34" height="34" rx="8" fill="#ff7a00" opacity="0.12"/>
+
+    <rect x="720" y="160" width="206" height="104" rx="14" fill="#102437" stroke="#1c3650"/>
+    <text x="740" y="188" fill="#6b7c8d" font-size="10" letter-spacing="1">ACTIVE PROJECTS</text>
+    <text x="740" y="224" fill="#ffffff" font-size="30" font-weight="700">12</text>
+    <rect x="880" y="176" width="34" height="34" rx="8" fill="#3aa0ff" opacity="0.12"/>
+
+    <rect x="940" y="160" width="228" height="104" rx="14" fill="#102437" stroke="#1c3650"/>
+    <text x="960" y="188" fill="#6b7c8d" font-size="10" letter-spacing="1">PENDING REPORTS</text>
+    <text x="960" y="224" fill="#ffffff" font-size="30" font-weight="700">7</text>
+    <rect x="1120" y="176" width="34" height="34" rx="8" fill="#f5b300" opacity="0.12"/>
+  </g>
+
+  <!-- Chart card -->
+  <rect x="280" y="284" width="540" height="330" rx="14" fill="#102437" stroke="#1c3650"/>
+  <text x="300" y="316" fill="#ffffff" font-size="14" font-weight="600">Revenue vs Expense</text>
+  <text x="300" y="334" fill="#6b7c8d" font-size="11">Last 6 months (SAR)</text>
+  <polyline points="300,560 380,520 460,540 540,470 620,430 700,450 790,400" fill="none" stroke="#ff7a00" stroke-width="3"/>
+  <polyline points="300,580 380,560 460,565 540,540 620,520 700,530 790,500" fill="none" stroke="#3aa0ff" stroke-width="3"/>
+  <g fill="#1c3650"><rect x="300" y="590" width="490" height="1"/></g>
+
+  <!-- Side list card -->
+  <rect x="840" y="284" width="328" height="330" rx="14" fill="#102437" stroke="#1c3650"/>
+  <text x="860" y="316" fill="#ffffff" font-size="14" font-weight="600">Recent Inspections</text>
+  <g>
+    <rect x="858" y="332" width="292" height="54" rx="10" fill="#0a2033" stroke="#1c3650"/>
+    <text x="876" y="356" fill="#ffffff" font-size="12" font-weight="600">Scaffolding Inspection</text>
+    <text x="876" y="374" fill="#6b7c8d" font-size="10">Sadara Chemical · Jubail</text>
+    <rect x="1086" y="348" width="48" height="20" rx="10" fill="#ff7a00" opacity="0.15"/>
+    <text x="1110" y="362" fill="#ff7a00" font-size="9" text-anchor="middle">High</text>
+
+    <rect x="858" y="396" width="292" height="54" rx="10" fill="#0a2033" stroke="#1c3650"/>
+    <text x="876" y="420" fill="#ffffff" font-size="12" font-weight="600">QA/QC Inspection</text>
+    <text x="876" y="438" fill="#6b7c8d" font-size="10">SABIC · Plant 4</text>
+    <rect x="1086" y="412" width="48" height="20" rx="10" fill="#3aa0ff" opacity="0.15"/>
+    <text x="1110" y="426" fill="#3aa0ff" font-size="9" text-anchor="middle">Med</text>
+
+    <rect x="858" y="460" width="292" height="54" rx="10" fill="#0a2033" stroke="#1c3650"/>
+    <text x="876" y="484" fill="#ffffff" font-size="12" font-weight="600">NDT Inspection</text>
+    <text x="876" y="502" fill="#6b7c8d" font-size="10">Ma'aden · Ras Al Khair</text>
+    <rect x="1086" y="476" width="48" height="20" rx="10" fill="#2dd47f" opacity="0.15"/>
+    <text x="1110" y="490" fill="#2dd47f" font-size="9" text-anchor="middle">Done</text>
+  </g>
+
+  <!-- watermark logo -->
+  <text x="1120" y="660" fill="#ffffff" opacity="0.05" font-size="120" font-weight="800" text-anchor="end">EI</text>
+</svg>
