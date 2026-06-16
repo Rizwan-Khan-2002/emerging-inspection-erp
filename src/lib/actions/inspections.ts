@@ -66,6 +66,33 @@ export async function setInspectionPriority(
   return { ok: true };
 }
 
+/** Persist the inspection checklist (jsonb array). */
+export async function updateInspectionChecklist(
+  id: string, checklist: unknown[]
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("inspections").update({ checklist }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  return { ok: true };
+}
+
+/** Assign / unassign an inspector or coordinator to an inspection. */
+export async function setInspectionAssignee(
+  id: string, field: "inspector_id" | "coordinator_id", profileId: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("inspections").update({ [field]: profileId }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  revalidatePath("/inspections");
+  return { ok: true };
+}
+
 /** Append an uploaded site-photo URL to an inspection's photos array. */
 export async function addInspectionPhoto(
   id: string, url: string

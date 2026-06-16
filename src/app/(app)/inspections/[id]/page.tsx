@@ -11,8 +11,9 @@ import { PrioritySelect } from "@/components/inspections/priority-select";
 import { Checklist } from "@/components/inspections/checklist";
 import { SubmitReport } from "@/components/inspections/submit-report";
 import { SitePhotos } from "@/components/inspections/site-photos";
-import { INSPECTION_TYPE } from "@/lib/constants";
-import { getInspectionById } from "@/lib/data";
+import { AssigneeSelect } from "@/components/inspections/assignee-select";
+import { INSPECTION_TYPE, ROLE_LABELS } from "@/lib/constants";
+import { getInspectionById, getProfiles } from "@/lib/data";
 import { formatDateTime, mapsUrl } from "@/lib/format";
 
 export default async function InspectionDetailPage({
@@ -21,8 +22,16 @@ export default async function InspectionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const job = await getInspectionById(id);
+  const [job, profiles] = await Promise.all([getInspectionById(id), getProfiles()]);
   if (!job) notFound();
+
+  const staff = profiles.filter((p) => p.active !== false && p.role !== "client");
+  const inspectorOpts = staff
+    .filter((p) => ["inspector", "coordinator", "admin"].includes(p.role))
+    .map((p) => ({ id: p.id, full_name: p.full_name, role: ROLE_LABELS[p.role] }));
+  const coordinatorOpts = staff
+    .filter((p) => ["coordinator", "admin", "owner", "super_admin"].includes(p.role))
+    .map((p) => ({ id: p.id, full_name: p.full_name, role: ROLE_LABELS[p.role] }));
 
   return (
     <div className="space-y-6">
@@ -47,7 +56,7 @@ export default async function InspectionDetailPage({
 
           <Card>
             <CardHeader><CardTitle>Inspection Checklist</CardTitle></CardHeader>
-            <CardContent><Checklist initial={job.checklist ?? []} /></CardContent>
+            <CardContent><Checklist inspectionId={job.id} initial={job.checklist ?? []} /></CardContent>
           </Card>
 
           <Card>
@@ -66,8 +75,20 @@ export default async function InspectionDetailPage({
             <CardContent className="space-y-4">
               <Detail icon={<Building2 />} label="Client" value={job.client_name} />
               <Detail icon={<MapPin />} label="Site" value={job.site_location} />
-              <Detail icon={<User />} label="Inspector" value={job.inspector_name ?? "Unassigned"} />
-              <Detail icon={<User />} label="Coordinator" value={job.coordinator_name ?? "—"} />
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 text-steel-dim [&_svg]:size-4"><User /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-xs text-steel-dim">Inspector</p>
+                  <AssigneeSelect inspectionId={job.id} field="inspector_id" initial={job.inspector_id} options={inspectorOpts} placeholder="Assign inspector" />
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 text-steel-dim [&_svg]:size-4"><User /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-xs text-steel-dim">Coordinator</p>
+                  <AssigneeSelect inspectionId={job.id} field="coordinator_id" initial={job.coordinator_id} options={coordinatorOpts} placeholder="Assign coordinator" />
+                </div>
+              </div>
               <Detail icon={<CalendarClock />} label="Scheduled" value={formatDateTime(job.scheduled_at)} />
               {job.approval_type && <Detail icon={<ShieldCheck />} label="Approval" value={job.approval_type === "aramco" ? "Aramco" : "Non-Aramco"} />}
               {job.qm_type && <Detail icon={<ShieldCheck />} label="QM Type" value={job.qm_type} />}
