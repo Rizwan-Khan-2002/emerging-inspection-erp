@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { notify, notifyOps } from "./notifications";
+import { sendEmail, emailLayout, button } from "@/lib/email";
 import type { ReportStatus } from "@/lib/types";
 
 /** Inspector / coordinator submits a report for an inspection → goes to coordinator review. */
@@ -53,6 +54,28 @@ export async function setReportStatus(
 
   if (status === "sent_to_client") {
     await notify(["client"], { title: "New inspection report available", body: "A report has been shared with you.", type: "info" });
+
+    // Email the client their report PDF link (best-effort).
+    const { data: rep } = await sb
+      .from("reports")
+      .select("inspection_id, inspections(ref, clients(company_name, email))")
+      .eq("id", reportId)
+      .maybeSingle();
+    const insp = rep?.inspections as { ref?: string; clients?: { company_name?: string; email?: string } } | null;
+    const clientEmail = insp?.clients?.email;
+    if (clientEmail) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://emerging-erp.vercel.app";
+      await sendEmail({
+        to: clientEmail,
+        subject: `Inspection report ${insp?.ref ?? ""} is ready`,
+        html: emailLayout("Your inspection report is ready 📄", `
+          <p>Dear ${insp?.clients?.company_name ?? "Client"},</p>
+          <p>The inspection report <strong>${insp?.ref ?? ""}</strong> has been reviewed and approved, and is now available for you.</p>
+          <p style="margin:20px 0">${button(`${appUrl}/api/pdf/report/${rep?.inspection_id}`, "Download report PDF")}</p>
+          <p style="color:#6b7c8d;font-size:12px">Thank you for choosing Emerging Inspection.</p>
+        `),
+      });
+    }
   }
   revalidatePath("/reports");
   return { ok: true };

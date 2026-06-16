@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLE_LABELS } from "@/lib/constants";
+import { sendEmail, emailLayout, button } from "@/lib/email";
 import type { Role } from "@/lib/types";
 
 /** Owner/admin creates a team member account directly with a role (no signup needed). */
@@ -46,6 +47,25 @@ export async function createTeamMember(data: {
       });
     }
   }
+
+  // Send a branded invite email with login details (best-effort — never blocks creation).
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://emerging-erp.vercel.app";
+  await sendEmail({
+    to: data.email,
+    subject: "You've been added to Emerging Inspection ERP",
+    html: emailLayout("Welcome to the team 👋", `
+      <p>Hi ${data.full_name},</p>
+      <p>An account has been created for you on <strong>Emerging Inspection ERP</strong> as <strong>${ROLE_LABELS[data.role]}</strong>.</p>
+      <p style="background:#071827;border:1px solid #1c3650;border-radius:8px;padding:12px 16px">
+        <strong style="color:#fff">Login email:</strong> ${data.email}<br/>
+        <strong style="color:#fff">Temporary password:</strong> ${data.password}
+      </p>
+      <p>Please sign in and change your password from your profile.</p>
+      <p style="margin:20px 0">${button(`${appUrl}/login`, "Sign in to ERP")}</p>
+      <p style="color:#6b7c8d;font-size:12px">If you didn't expect this, you can ignore this email.</p>
+    `),
+  });
+
   revalidatePath("/users");
   revalidatePath("/employees");
   return { ok: true };
