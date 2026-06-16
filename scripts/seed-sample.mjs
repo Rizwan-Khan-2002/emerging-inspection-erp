@@ -119,19 +119,19 @@ async function main() {
     {
       ref: "INS-2026-0101", type: "mechanical", client_id: aramcoId, site_location: "Abqaiq Plant – Unit 042",
       scheduled_at: iso(today), priority: "high", status: "in_progress",
-      approval_type: "aramco", qm_type: "QM-5", material: null,
+      approval_type: "aramco", qm_type: "QM-5", material: null, lat: 25.9342, lng: 49.6713,
       remarks: "Aramco QM-5 mechanical approval — pressure vessel weld verification.",
     },
     {
       ref: "INS-2026-0102", type: "qaqc", client_id: sabicId, site_location: "Jubail – Fabrication Yard 3",
       scheduled_at: iso(new Date(today.getTime() + 86400000)), priority: "medium", status: "assigned",
-      approval_type: "non_aramco", qm_type: null, material: "Fastener",
+      approval_type: "non_aramco", qm_type: null, material: "Fastener", lat: 27.0174, lng: 49.6225,
       remarks: "Non-Aramco third-party QA/QC — fastener material certification & hardness check.",
     },
     {
       ref: "INS-2026-0103", type: "ndt", client_id: aramcoId, site_location: "Ras Tanura – Tank Farm",
       scheduled_at: iso(new Date(today.getTime() + 2 * 86400000)), priority: "critical", status: "pending",
-      approval_type: "aramco", qm_type: "QM-7", material: null,
+      approval_type: "aramco", qm_type: "QM-7", material: null, lat: 26.6442, lng: 50.1583,
       remarks: "Aramco QM-7 NDT — UT thickness survey on storage tank shell.",
     },
   ], "ref");
