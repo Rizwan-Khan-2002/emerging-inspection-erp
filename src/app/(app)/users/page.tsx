@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/common/empty-state";
 import { UserRoleSelect } from "@/components/users/user-role-select";
 import { AddTeamMember } from "@/components/users/add-team-member";
+import { UserActions } from "@/components/users/user-actions";
 import { getCurrentUser } from "@/lib/auth";
 import { getProfiles } from "@/lib/data";
 import { initials } from "@/lib/utils";
@@ -39,6 +40,7 @@ export default async function UsersPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="w-10" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -53,6 +55,9 @@ export default async function UsersPage() {
                     <TableCell className="text-sm text-steel">{u.email}</TableCell>
                     <TableCell><UserRoleSelect userId={u.id} role={u.role} self={me?.id === u.id} /></TableCell>
                     <TableCell><Badge tone={u.active ? "success" : "neutral"}>{u.active ? "Active" : "Inactive"}</Badge></TableCell>
+                    <TableCell>
+                      <UserActions userId={u.id} name={u.full_name} active={u.active} self={me?.id === u.id} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ROLE_LABELS } from "@/lib/constants";
 import type { Role } from "@/lib/types";
 
 /** Owner/admin creates a team member account directly with a role (no signup needed). */
@@ -31,8 +32,60 @@ export async function createTeamMember(data: {
     await admin.from("profiles").upsert({
       id: created.user.id, full_name: data.full_name, email: data.email, role: data.role, active: true,
     });
+    // Staff roles also become an Employee record (so they appear under Employees).
+    if (["admin", "hr", "coordinator", "inspector"].includes(data.role)) {
+      const code = `EMP-${created.user.id.slice(0, 6).toUpperCase()}`;
+      await admin.from("employees").insert({
+        profile_id: created.user.id,
+        employee_code: code,
+        full_name: data.full_name,
+        email: data.email,
+        position: ROLE_LABELS[data.role],
+        department: "Operations",
+        status: "active",
+      });
+    }
   }
   revalidatePath("/users");
+  revalidatePath("/employees");
+  return { ok: true };
+}
+
+/** Set a new password for a user (admin). */
+export async function resetUserPassword(userId: string, password: string): Promise<{ ok: boolean; error?: string }> {
+  const me = await getCurrentUser();
+  if (!me || !["super_admin", "owner", "admin"].includes(me.role)) return { ok: false, error: "Not authorised." };
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "Admin not configured." };
+  const { error } = await admin.auth.admin.updateUserById(userId, { password });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/** Activate / deactivate a user (deactivated users are blocked at login). */
+export async function setUserActive(userId: string, active: boolean): Promise<{ ok: boolean; error?: string }> {
+  const me = await getCurrentUser();
+  if (!me || !["super_admin", "owner", "admin"].includes(me.role)) return { ok: false, error: "Not authorised." };
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "Admin not configured." };
+  await admin.from("profiles").update({ active }).eq("id", userId);
+  await admin.auth.admin.updateUserById(userId, active ? { ban_duration: "none" } : { ban_duration: "876000h" });
+  revalidatePath("/users");
+  return { ok: true };
+}
+
+/** Permanently remove a user account (and their profile/employee via cascade). */
+export async function removeUser(userId: string): Promise<{ ok: boolean; error?: string }> {
+  const me = await getCurrentUser();
+  if (!me || !["super_admin", "owner", "admin"].includes(me.role)) return { ok: false, error: "Not authorised." };
+  if (me.id === userId) return { ok: false, error: "You cannot remove your own account." };
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "Admin not configured." };
+  await admin.from("employees").delete().eq("profile_id", userId);
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/users");
+  revalidatePath("/employees");
   return { ok: true };
 }
 

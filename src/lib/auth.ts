@@ -38,7 +38,10 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
         .select("*")
         .eq("id", user.id)
         .single();
-      if (profile) return profile as UserProfile;
+      if (profile) {
+        if ((profile as UserProfile).active === false) return null; // deactivated → blocked
+        return profile as UserProfile;
+      }
 
       // Self-heal: auth user exists but has no profile row yet (e.g. account
       // created before the DB trigger, or trigger disabled). Create it now.
