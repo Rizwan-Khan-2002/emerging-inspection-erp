@@ -92,11 +92,22 @@ export async function getInspections() {
     mock.mockInspections
   ).then((rows) => rows.map((r) => ({ ...r, client_name: (r as Inspection & { clients?: { company_name?: string } }).clients?.company_name ?? r.client_name ?? "—" })));
 }
-export async function getInspectionById(id: string): Promise<Inspection | null> {
-  if (!isSupabaseConfigured) return mock.mockInspections.find((i) => i.id === id) ?? null;
+export async function getInspectionByRef(ref: string): Promise<Inspection | null> {
+  if (!isSupabaseConfigured) return mock.mockInspections.find((i) => i.ref === ref) ?? null;
   const sb = await createClient();
   if (!sb) return null;
-  const { data, error } = await sb.from("inspections").select("*, clients(company_name)").eq("id", id).single();
+  const { data, error } = await sb.from("inspections").select("*, clients(company_name)").eq("ref", ref).maybeSingle();
+  if (error || !data) return null;
+  return { ...data, client_name: (data.clients as { company_name?: string } | null)?.company_name ?? "—" } as Inspection;
+}
+
+export async function getInspectionById(id: string): Promise<Inspection | null> {
+  if (!isSupabaseConfigured) return mock.mockInspections.find((i) => i.id === id) ?? null;
+  // Accept a job ref (e.g. INS-2026-0101) too, for resilient PDF links.
+  if (/^INS-/i.test(id)) return getInspectionByRef(id);
+  const sb = await createClient();
+  if (!sb) return null;
+  const { data, error } = await sb.from("inspections").select("*, clients(company_name)").eq("id", id).maybeSingle();
   if (error || !data) return null;
   return { ...data, client_name: (data.clients as { company_name?: string } | null)?.company_name ?? "—" } as Inspection;
 }
