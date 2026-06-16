@@ -2,7 +2,8 @@ import { Building2 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { AddClient } from "@/components/clients/add-client";
 import { ImportExport } from "@/components/common/import-export";
-import { importClients } from "@/lib/actions/entities";
+import { DeleteButton } from "@/components/common/delete-button";
+import { importClients, deleteRecord } from "@/lib/actions/entities";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,6 +40,7 @@ export default async function ClientsPage() {
                 <TableHead>Terms</TableHead>
                 <TableHead className="text-right">Outstanding</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-10 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -65,6 +67,12 @@ export default async function ClientsPage() {
                     </span>
                   </TableCell>
                   <TableCell><Badge tone={c.active ? "success" : "neutral"}>{c.active ? "Active" : "Inactive"}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <DeleteButton
+                      action={deleteRecord.bind(null, "clients", c.id, "/clients")}
+                      name={c.company_name}
+                    />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

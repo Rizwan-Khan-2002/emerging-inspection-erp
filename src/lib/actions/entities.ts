@@ -112,6 +112,37 @@ export async function setApproval(
   return { ok: true };
 }
 
+/** Delete an employee + all their linked records (payroll, attendance, overtime cascade). */
+export async function deleteEmployee(id: string): Promise<Res> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  // Clean up records that don't cascade, then the employee.
+  await sb.from("fuel_expenses").delete().eq("employee_id", id);
+  await sb.from("expense_claims").delete().eq("employee_id", id);
+  await sb.from("overtime").delete().eq("employee_id", id);
+  await sb.from("attendance").delete().eq("employee_id", id);
+  await sb.from("payroll").delete().eq("employee_id", id);
+  const { error } = await sb.from("employees").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/employees");
+  return { ok: true };
+}
+
+/** Generic single-record delete for simple tables (clients, vehicles, projects, quotations, invoices). */
+export async function deleteRecord(
+  table: "clients" | "vehicles" | "projects" | "quotations" | "invoices",
+  id: string, revalidate: string
+): Promise<Res> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from(table).delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(revalidate);
+  return { ok: true };
+}
+
 const norm = (k: string) => k.trim().toLowerCase().replace(/[\s-]+/g, "_");
 type ImportRes = { ok: boolean; count: number; error?: string };
 

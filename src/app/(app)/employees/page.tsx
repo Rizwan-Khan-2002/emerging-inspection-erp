@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddEmployee } from "@/components/employees/add-employee";
 import { ImportExport } from "@/components/common/import-export";
-import { importEmployees } from "@/lib/actions/entities";
+import { DeleteButton } from "@/components/common/delete-button";
+import { importEmployees, deleteEmployee } from "@/lib/actions/entities";
 import { getEmployees } from "@/lib/data";
 import { formatSAR } from "@/lib/format";
 import { initials } from "@/lib/utils";
@@ -49,6 +50,7 @@ export default async function EmployeesPage() {
                 <TableHead className="text-right">OT Rate</TableHead>
                 <TableHead>Vehicle</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-10 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,6 +71,13 @@ export default async function EmployeesPage() {
                   <TableCell className="text-right text-sm text-steel">{e.ot_rate ? `${e.ot_rate}/hr` : "—"}</TableCell>
                   <TableCell className="text-sm text-steel">{e.assigned_vehicle ?? "—"}</TableCell>
                   <TableCell><Badge tone={STATUS[e.status].tone}>{STATUS[e.status].label}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <DeleteButton
+                      action={deleteEmployee.bind(null, e.id)}
+                      name={e.full_name}
+                      note={`This permanently removes ${e.full_name} along with their payroll, attendance, overtime, fuel and expense records.`}
+                    />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

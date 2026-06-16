@@ -1,6 +1,8 @@
 import { Truck, Wrench } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { AddVehicle } from "@/components/vehicles/add-vehicle";
+import { DeleteButton } from "@/components/common/delete-button";
+import { deleteRecord } from "@/lib/actions/entities";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -34,6 +36,7 @@ export default async function VehiclesPage() {
                 <TableHead>Insurance Expiry</TableHead>
                 <TableHead>Next Service</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-10 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -60,6 +63,12 @@ export default async function VehiclesPage() {
                       </span>
                     </TableCell>
                     <TableCell><Badge tone={STATUS[v.status].tone}>{STATUS[v.status].label}</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <DeleteButton
+                        action={deleteRecord.bind(null, "vehicles", v.id, "/vehicles")}
+                        name={v.plate_number}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
