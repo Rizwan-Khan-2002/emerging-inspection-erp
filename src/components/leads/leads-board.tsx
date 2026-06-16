@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   MessageCircle, MoreHorizontal, Pencil, Plus, Search, Sparkles, Target, Phone,
+  FileDown, FileUp, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +24,8 @@ import { AiEmailDialog } from "./ai-email-dialog";
 import { LEAD_SOURCE_LABELS, LEAD_STATUS } from "@/lib/constants";
 import { formatDate, formatSAR, whatsappUrl } from "@/lib/format";
 import { whatsappMessage } from "@/lib/ai-templates";
-import { createLead, updateLead } from "@/lib/actions/leads";
+import { createLead, importLeads, updateLead } from "@/lib/actions/leads";
+import { exportToExcel, parseExcelFile } from "@/lib/excel";
 import type { Lead, LeadStatus } from "@/lib/types";
 import type { LeadFormValues } from "@/lib/validations/lead";
 
@@ -34,6 +37,40 @@ export function LeadsBoard({ initialLeads }: { initialLeads: Lead[] }) {
   const [editing, setEditing] = useState<Lead | null>(null);
   const [aiLead, setAiLead] = useState<Lead | null>(null);
   const [, startTransition] = useTransition();
+  const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, startImport] = useTransition();
+
+  // Keep board in sync with server data (after import / refresh).
+  useEffect(() => { setLeads(initialLeads); }, [initialLeads]);
+
+  function handleExport() {
+    const rows = leads.map((l) => ({
+      company_name: l.company_name, industry: l.industry, contact_person: l.contact_person,
+      position: l.position ?? "", email: l.email ?? "", phone: l.phone ?? "", whatsapp: l.whatsapp ?? "",
+      country: l.country, city: l.city ?? "", source: l.source, status: l.status,
+      estimated_value: l.estimated_value ?? 0, follow_up_date: l.follow_up_date ?? "", notes: l.notes ?? "",
+    }));
+    exportToExcel(rows, `leads-${new Date().toISOString().slice(0, 10)}`, "Leads");
+  }
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    startImport(async () => {
+      try {
+        const rows = await parseExcelFile(file);
+        const res = await importLeads(rows);
+        if (!res.ok) { alert(res.error ?? "Import failed"); return; }
+        alert(`✅ Imported ${res.count} lead(s).`);
+        router.refresh();
+      } catch {
+        alert("Could not read the file. Use a .xlsx or .csv file.");
+      } finally {
+        if (fileRef.current) fileRef.current.value = "";
+      }
+    });
+  }
 
   const filtered = useMemo(() => {
     return leads.filter((l) => {
@@ -104,6 +141,13 @@ export function LeadsBoard({ initialLeads }: { initialLeads: Lead[] }) {
             ))}
           </SelectContent>
         </Select>
+        <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportFile} />
+        <Button variant="secondary" onClick={() => fileRef.current?.click()} disabled={importing}>
+          {importing ? <Loader2 className="animate-spin" /> : <FileUp />} Import
+        </Button>
+        <Button variant="secondary" onClick={handleExport} disabled={!leads.length}>
+          <FileDown /> Export
+        </Button>
         <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
           <Plus /> New Lead
         </Button>
