@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { Info, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -65,6 +65,29 @@ export default async function UsersPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardContent className="p-5">
+          <p className="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <ShieldCheck className="size-4 text-accent" /> Roles &amp; access — what each role sees
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { r: "Super Admin / Owner", d: "Full access — every module, all data, manage users & roles." },
+              { r: "Admin", d: "Sales, operations, fleet, finance, employees & users." },
+              { r: "HR Manager", d: "Employees, attendance, overtime, payroll." },
+              { r: "Coordinator", d: "Inspections, report approval, OT & fuel approval, field ops." },
+              { r: "Inspector", d: "Assigned jobs, checklist, photos, fuel claims, submit reports." },
+              { r: "Client", d: "Only their own reports, projects and invoices." },
+            ].map((x) => (
+              <div key={x.r} className="rounded-lg border border-border bg-navy-700 p-3">
+                <p className="text-sm font-medium text-accent">{x.r}</p>
+                <p className="mt-1 text-xs text-steel-dim">{x.d}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
