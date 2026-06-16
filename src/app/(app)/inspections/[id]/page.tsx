@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusWorkflow } from "@/components/inspections/status-workflow";
 import { Checklist } from "@/components/inspections/checklist";
+import { SubmitReport } from "@/components/inspections/submit-report";
 import { INSPECTION_TYPE, PRIORITY } from "@/lib/constants";
 import { getInspectionById } from "@/lib/data";
 import { formatDateTime, mapsUrl } from "@/lib/format";
@@ -30,6 +31,7 @@ export default async function InspectionDetailPage({
 
       <PageHeader title={job.ref} description={INSPECTION_TYPE[job.type]}>
         <Badge tone={PRIORITY[job.priority].tone}>{PRIORITY[job.priority].label} priority</Badge>
+        <SubmitReport inspectionId={job.id} />
         <Button asChild variant="secondary">
           <a href={`/api/pdf/report/${job.id}`} target="_blank" rel="noreferrer"><FileDown /> Generate PDF Report</a>
         </Button>

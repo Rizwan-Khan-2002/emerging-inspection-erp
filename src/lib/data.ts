@@ -128,7 +128,24 @@ export async function getPayrollById(id: string): Promise<PayrollRecord | null> 
 }
 
 export async function getReports() {
-  return read<InspectionReport>((sb) => sb.from("reports").select("*").order("created_at", { ascending: false }), mock.mockReports);
+  if (!isSupabaseConfigured) return mock.mockReports;
+  const sb = await createClient();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from("reports")
+    .select("*, inspections(ref, type, clients(company_name))")
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map((r) => {
+    const insp = r.inspections as { ref?: string; type?: string; clients?: { company_name?: string } } | null;
+    return {
+      ...r,
+      inspection_ref: insp?.ref ?? "—",
+      type: (insp?.type ?? "qaqc") as InspectionReport["type"],
+      client_name: insp?.clients?.company_name ?? "—",
+      inspector_name: r.inspector_name ?? "—",
+    };
+  }) as InspectionReport[];
 }
 type Named = { company_name?: string } | null;
 type EmpNamed = { full_name?: string } | null;

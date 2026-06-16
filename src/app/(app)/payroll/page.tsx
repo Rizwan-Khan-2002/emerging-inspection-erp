@@ -20,12 +20,13 @@ const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
 
 export default async function PayrollPage() {
   const [payroll, employees] = await Promise.all([getPayroll(), getEmployees()]);
+  const period = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   const total = payroll.reduce((s, p) => s + p.net_salary, 0);
   const ot = payroll.reduce((s, p) => s + p.ot_amount, 0);
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Payroll" description="May 2026 payroll run · Basic + OT + Allowances − Deductions = Net.">
+      <PageHeader title="Payroll" description={`${period} · Basic + OT + Allowances − Deductions = Net.`}>
         <AddPayroll employees={employees.map((e) => ({ id: e.id, full_name: e.full_name, basic_salary: e.basic_salary }))} />
       </PageHeader>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
