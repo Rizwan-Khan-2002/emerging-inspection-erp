@@ -46,6 +46,13 @@ async function findOrCreate(table, matchCol, matchVal, row) {
   return created[0].id;
 }
 
+// Insert rows only if the table has no data yet (for tables without a unique key).
+async function seedIfEmpty(table, rows) {
+  const existing = await rest("GET", `${table}?select=id&limit=1`);
+  if (existing?.length) { console.log(`  • ${table} already has data — skipped`); return; }
+  await rest("POST", table, rows, "return=minimal");
+}
+
 const today = new Date();
 const iso = (d) => d.toISOString();
 const period = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
@@ -104,6 +111,7 @@ async function main() {
     assigned_employee: empByCode["EMP-101"], insurance_expiry: "2026-09-30",
     mileage: 84210, next_service_date: "2026-07-05", status: "active",
   }], "plate_number");
+  const vehId = vehicles[0].id;
   console.log("  ✓ vehicles");
 
   // ---- Inspections (Aramco + QM, and Non-Aramco + material) ----------
@@ -146,7 +154,33 @@ async function main() {
   ], "employee_id,period");
   console.log("  ✓ payroll");
 
-  console.log("\n✅ Sample data seeded. Open /employees, /inspections, /payroll, /clients to view.");
+  // ---- Attendance (last 3 days) --------------------------------------
+  await upsert("attendance", [
+    { employee_id: empByCode["EMP-101"], date: "2026-06-15", status: "present", check_in: "07:00", check_out: "17:00", total_hours: 10, late_minutes: 0 },
+    { employee_id: empByCode["EMP-101"], date: "2026-06-14", status: "night_shift", check_in: "19:00", check_out: "05:00", total_hours: 10, late_minutes: 0 },
+    { employee_id: empByCode["EMP-101"], date: "2026-06-13", status: "present", check_in: "07:08", check_out: "16:00", total_hours: 8.9, late_minutes: 8 },
+    { employee_id: empByCode["EMP-102"], date: "2026-06-15", status: "present", check_in: "07:00", check_out: "16:00", total_hours: 9, late_minutes: 0 },
+    { employee_id: empByCode["EMP-102"], date: "2026-06-14", status: "present", check_in: "07:00", check_out: "17:00", total_hours: 10, late_minutes: 0 },
+    { employee_id: empByCode["EMP-102"], date: "2026-06-13", status: "absent", check_in: null, check_out: null, total_hours: null, late_minutes: 0 },
+    { employee_id: empByCode["EMP-103"], date: "2026-06-15", status: "leave", check_in: null, check_out: null, total_hours: null, late_minutes: 0 },
+  ], "employee_id,date");
+  console.log("  ✓ attendance");
+
+  // ---- Overtime ------------------------------------------------------
+  await seedIfEmpty("overtime", [
+    { employee_id: empByCode["EMP-101"], date: "2026-06-14", start_time: "08:00", end_time: "20:00", total_hours: 12, standard_hours: 8, approval: "approved" },
+    { employee_id: empByCode["EMP-102"], date: "2026-06-13", start_time: "08:00", end_time: "18:00", total_hours: 10, standard_hours: 8, approval: "pending" },
+  ]);
+  console.log("  ✓ overtime");
+
+  // ---- Fuel expenses -------------------------------------------------
+  await seedIfEmpty("fuel_expenses", [
+    { vehicle_id: vehId, employee_id: empByCode["EMP-101"], date: "2026-06-12", liters: 60, amount: 138, approval: "approved" },
+    { vehicle_id: vehId, employee_id: empByCode["EMP-101"], date: "2026-06-08", liters: 55, amount: 126.5, approval: "pending" },
+  ]);
+  console.log("  ✓ fuel expenses");
+
+  console.log("\n✅ Sample data seeded. Open /employees, /inspections, /payroll, /attendance, /fuel, /clients to view.");
 }
 
 main().catch((e) => { console.error("\n❌ Seed failed:\n", e.message); process.exit(1); });

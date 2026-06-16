@@ -19,7 +19,7 @@ export async function createInspection(
   const { error } = await sb.from("inspections").insert({
     ref,
     type: v.type,
-    client_id: v.client_id,
+    client_id: v.client_id || null,
     site_location: v.site_location,
     scheduled_at: v.scheduled_at,
     priority: v.priority,

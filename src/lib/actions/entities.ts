@@ -146,12 +146,16 @@ export async function deleteRecord(
 const norm = (k: string) => k.trim().toLowerCase().replace(/[\s-]+/g, "_");
 type ImportRes = { ok: boolean; count: number; error?: string };
 
-async function bulkInsert(table: string, payload: Record<string, unknown>[], revalidate: string): Promise<ImportRes> {
+async function bulkInsert(
+  table: string, payload: Record<string, unknown>[], revalidate: string, onConflict?: string
+): Promise<ImportRes> {
   if (payload.length === 0) return { ok: false, count: 0, error: "No valid rows found in the file." };
   if (!isSupabaseConfigured) return { ok: true, count: payload.length };
   const sb = await createClient();
   if (!sb) return { ok: false, count: 0, error: "No database connection." };
-  const { error } = await sb.from(table).insert(payload);
+  const { error } = onConflict
+    ? await sb.from(table).upsert(payload, { onConflict })
+    : await sb.from(table).insert(payload);
   if (error) return { ok: false, count: 0, error: error.message };
   revalidatePath(revalidate);
   return { ok: true, count: payload.length };
@@ -177,13 +181,13 @@ export async function importClients(rows: Record<string, unknown>[]): Promise<Im
 }
 
 export async function importEmployees(rows: Record<string, unknown>[]): Promise<ImportRes> {
-  const payload = rows.map((r, i) => {
+  const mapped = rows.map((r) => {
     const o: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(r)) o[norm(k)] = v;
     const statusRaw = norm(String(o.status ?? "active"));
     const status = ["active", "on_leave", "inactive"].includes(statusRaw) ? statusRaw : "active";
     return {
-      employee_code: String(o.employee_code ?? o.code ?? `EMP-${String(i + 1).padStart(3, "0")}`).trim(),
+      employee_code: String(o.employee_code ?? o.code ?? "").trim(),
       full_name: String(o.full_name ?? o.name ?? "").trim(),
       iqama_passport: o.iqama_passport ? String(o.iqama_passport) : null,
       position: o.position ? String(o.position) : null,
@@ -195,7 +199,28 @@ export async function importEmployees(rows: Record<string, unknown>[]): Promise<
       status,
     };
   }).filter((e) => e.full_name);
-  return bulkInsert("employees", payload, "/employees");
+
+  if (mapped.length === 0) return { ok: false, count: 0, error: "No valid rows found in the file." };
+  if (!isSupabaseConfigured) return { ok: true, count: mapped.length };
+
+  const sb = await createClient();
+  if (!sb) return { ok: false, count: 0, error: "No database connection." };
+
+  // Auto-assign EMP-### codes for rows missing one, continuing past existing codes.
+  const { data: existing } = await sb.from("employees").select("employee_code");
+  const used = new Set<string>((existing ?? []).map((e) => String(e.employee_code)));
+  let n = Math.max(0, ...[...used].map((c) => { const m = /(\d+)\s*$/.exec(c); return m ? parseInt(m[1], 10) : 0; }));
+  for (const e of mapped) {
+    if (!e.employee_code) {
+      do { n++; e.employee_code = `EMP-${String(n).padStart(3, "0")}`; } while (used.has(e.employee_code));
+      used.add(e.employee_code);
+    }
+  }
+  // Collapse duplicate codes within the sheet (last row wins) so upsert is conflict-safe.
+  const byCode = new Map<string, (typeof mapped)[number]>();
+  for (const e of mapped) byCode.set(e.employee_code, e);
+
+  return bulkInsert("employees", [...byCode.values()], "/employees", "employee_code");
 }
 
 export async function createExpense(v: import("@/lib/validations/entities").ExpenseFormValues): Promise<Res> {

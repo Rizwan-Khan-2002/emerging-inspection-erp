@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Brand } from "./brand";
+import { HeaderSearch } from "./header-search";
 import { SidebarNav } from "./sidebar-nav";
 import { UserMenu } from "./user-menu";
 import { Notifications } from "./notifications";
@@ -15,10 +16,14 @@ import type { UserProfile } from "@/lib/types";
 export function AppShell({
   user,
   demoMode,
+  companyName,
+  logoUrl,
   children,
 }: {
   user: UserProfile;
   demoMode: boolean;
+  companyName?: string;
+  logoUrl?: string | null;
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -28,7 +33,7 @@ export function AppShell({
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-navy/80 backdrop-blur lg:flex">
         <div className="flex h-16 items-center border-b border-border px-5">
-          <Brand />
+          <Brand name={companyName} logoUrl={logoUrl} />
         </div>
         <div className="flex-1 overflow-y-auto">
           <SidebarNav role={user.role} />
@@ -47,7 +52,7 @@ export function AppShell({
           />
           <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-navy">
             <div className="flex h-16 items-center justify-between border-b border-border px-5">
-              <Brand />
+              <Brand name={companyName} logoUrl={logoUrl} />
               <button
                 onClick={() => setMobileOpen(false)}
                 className="rounded-md p-1.5 text-steel hover:bg-card-hover"
@@ -77,13 +82,7 @@ export function AppShell({
             <Menu className="size-5" />
           </button>
 
-          <div className="relative hidden max-w-md flex-1 md:block">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-steel-dim" />
-            <input
-              placeholder="Search leads, inspections, employees…"
-              className="h-10 w-full rounded-lg border border-border bg-navy-700 pl-9 pr-3 text-sm text-foreground placeholder:text-steel-dim focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-          </div>
+          <HeaderSearch role={user.role} />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             {demoMode && (
