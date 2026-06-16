@@ -108,14 +108,14 @@ export function CompanyForm({ initial }: { initial: CompanySettings }) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <F label="Company Name" e={errors.company_name?.message}><Input {...register("company_name")} /></F>
+            <F label="Company Name *" e={errors.company_name?.message}><Input {...register("company_name")} placeholder="Your company name (required)" /></F>
             <F label="Legal Name"><Input {...register("legal_name")} /></F>
             <F label="Address" full><Input {...register("address")} /></F>
             <F label="City"><Input {...register("city")} /></F>
             <F label="Country"><Input {...register("country")} /></F>
             <F label="VAT Number"><Input {...register("vat_number")} /></F>
             <F label="Phone"><Input {...register("phone")} /></F>
-            <F label="Email" e={errors.email?.message}><Input {...register("email")} type="email" /></F>
+            <F label="Email" e={errors.email?.message}><Input {...register("email")} type="text" placeholder="company@email.com" /></F>
             <div className="grid grid-cols-2 gap-4">
               <F label="Currency"><Input {...register("currency")} /></F>
               <F label="VAT %"><Input type="number" {...register("vat_percent")} /></F>
