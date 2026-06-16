@@ -38,6 +38,34 @@ export async function createInspection(
   return { ok: true, ref };
 }
 
+/** Update an inspection's job status (persists + revalidates). */
+export async function setInspectionStatus(
+  id: string, status: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("inspections").update({ status }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  revalidatePath("/inspections");
+  return { ok: true };
+}
+
+/** Update an inspection's priority (persists + revalidates). */
+export async function setInspectionPriority(
+  id: string, priority: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("inspections").update({ priority }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  revalidatePath("/inspections");
+  return { ok: true };
+}
+
 /** Append an uploaded site-photo URL to an inspection's photos array. */
 export async function addInspectionPhoto(
   id: string, url: string

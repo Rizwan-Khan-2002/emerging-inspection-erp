@@ -71,6 +71,17 @@ export async function createPayroll(v: import("@/lib/validations/entities").Payr
   return insert("payroll", { ...v }, "/payroll");
 }
 
+/** Move a payroll record through draft → approved → paid. */
+export async function setPayrollStatus(id: string, status: "draft" | "approved" | "paid"): Promise<Res> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("payroll").update({ status }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/payroll");
+  return { ok: true };
+}
+
 export async function createFuel(v: import("@/lib/validations/entities").FuelFormValues): Promise<Res> {
   const res = await insert("fuel_expenses", {
     vehicle_id: v.vehicle_id,
@@ -82,6 +93,24 @@ export async function createFuel(v: import("@/lib/validations/entities").FuelFor
   }, "/fuel");
   if (res.ok) await notifyOps({ title: "Fuel claim submitted", body: `${v.amount} SAR — awaiting approval`, type: "warning" });
   return res;
+}
+
+export async function createAttendance(v: import("@/lib/validations/entities").AttendanceFormValues): Promise<Res> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { error } = await sb.from("attendance").upsert({
+    employee_id: v.employee_id,
+    date: v.date,
+    status: v.status,
+    check_in: v.check_in || null,
+    check_out: v.check_out || null,
+    total_hours: v.total_hours ?? null,
+    late_minutes: v.late_minutes ?? 0,
+  }, { onConflict: "employee_id,date" });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/attendance");
+  return { ok: true };
 }
 
 export async function createOvertime(v: import("@/lib/validations/entities").OvertimeFormValues): Promise<Res> {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddPayroll } from "@/components/payroll/add-payroll";
+import { PayrollActions } from "@/components/payroll/payroll-actions";
 import { getEmployees, getPayroll } from "@/lib/data";
 import { formatSAR } from "@/lib/format";
 import type { BadgeTone } from "@/lib/constants";
@@ -51,6 +52,7 @@ export default async function PayrollPage() {
                 <TableHead className="text-right">Deductions</TableHead>
                 <TableHead className="text-right">Net Salary</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Action</TableHead>
                 <TableHead className="text-right">Payslip</TableHead>
               </TableRow>
             </TableHeader>
@@ -64,6 +66,9 @@ export default async function PayrollPage() {
                   <TableCell className="text-right text-sm text-danger">−{formatSAR(p.deductions)}</TableCell>
                   <TableCell className="text-right font-semibold">{formatSAR(p.net_salary)}</TableCell>
                   <TableCell><Badge tone={STATUS[p.status].tone}>{STATUS[p.status].label}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <PayrollActions id={p.id} status={p.status} />
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="sm">
                       <a href={`/api/pdf/payslip/${p.id}`} target="_blank" rel="noreferrer"><FileDown /> PDF</a>

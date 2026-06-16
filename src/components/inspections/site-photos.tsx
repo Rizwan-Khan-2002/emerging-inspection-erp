@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { addInspectionPhoto, removeInspectionPhoto } from "@/lib/actions/inspections";
 
 export function SitePhotos({
@@ -16,6 +17,7 @@ export function SitePhotos({
   const [photos, setPhotos] = useState<string[]>(initial ?? []);
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
   const [, start] = useTransition();
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -69,11 +71,13 @@ export function SitePhotos({
 
         {photos.map((url) => (
           <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-navy-700">
-            <Image src={url} alt="Site photo" fill sizes="120px" className="object-cover" unoptimized />
+            <button type="button" onClick={() => setPreview(url)} className="absolute inset-0 cursor-zoom-in" aria-label="View photo">
+              <Image src={url} alt="Site photo" fill sizes="120px" className="object-cover transition-transform group-hover:scale-105" unoptimized />
+            </button>
             <button
               type="button"
               onClick={() => remove(url)}
-              className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity hover:bg-danger group-hover:opacity-100"
+              className="absolute right-1 top-1 z-10 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity hover:bg-danger group-hover:opacity-100"
               aria-label="Remove photo"
             >
               <X className="size-3.5" />
@@ -81,6 +85,25 @@ export function SitePhotos({
           </div>
         ))}
       </div>
+
+      {/* Full-size lightbox */}
+      {preview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setPreview(null)}
+        >
+          <div className="relative max-h-[90vh] max-w-4xl" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview} alt="Site photo full size" className="max-h-[85vh] w-auto rounded-lg object-contain" />
+            <div className="mt-3 flex justify-center gap-2">
+              <Button variant="danger" size="sm" onClick={() => { remove(preview); setPreview(null); }}>
+                <X /> Delete this photo
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setPreview(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
       <p className="mt-3 text-xs text-steel-dim">
         {photos.length > 0
           ? `${photos.length} photo${photos.length > 1 ? "s" : ""} uploaded — stored in Supabase Storage.`

@@ -104,6 +104,17 @@ export const overtimeSchema = z.object({
 });
 export type OvertimeFormValues = z.infer<typeof overtimeSchema>;
 
+export const attendanceSchema = z.object({
+  employee_id: z.string().min(1, "Employee is required"),
+  date: z.string().min(1, "Date is required"),
+  status: z.enum(["present", "absent", "leave", "half_day", "night_shift"]),
+  check_in: z.string().optional(),
+  check_out: z.string().optional(),
+  total_hours: z.coerce.number().min(0).optional(),
+  late_minutes: z.coerce.number().min(0).optional(),
+});
+export type AttendanceFormValues = z.infer<typeof attendanceSchema>;
+
 export const teamMemberSchema = z.object({
   full_name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),

@@ -60,7 +60,7 @@ export default async function ReportsPage() {
                     <TableCell><StatusBadge status={REPORT_STATUS[r.status]} /></TableCell>
                     <TableCell className="text-right">
                       <Button asChild variant="ghost" size="sm">
-                        <a href={`/api/pdf/report/${r.inspection_ref}`} target="_blank" rel="noreferrer"><FileDown /> PDF</a>
+                        <a href={`/api/pdf/report/${r.inspection_id}`} target="_blank" rel="noreferrer"><FileDown /> PDF</a>
                       </Button>
                     </TableCell>
                     {canManage && (

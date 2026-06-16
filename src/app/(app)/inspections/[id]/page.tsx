@@ -5,13 +5,13 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusWorkflow } from "@/components/inspections/status-workflow";
+import { PrioritySelect } from "@/components/inspections/priority-select";
 import { Checklist } from "@/components/inspections/checklist";
 import { SubmitReport } from "@/components/inspections/submit-report";
 import { SitePhotos } from "@/components/inspections/site-photos";
-import { INSPECTION_TYPE, PRIORITY } from "@/lib/constants";
+import { INSPECTION_TYPE } from "@/lib/constants";
 import { getInspectionById } from "@/lib/data";
 import { formatDateTime, mapsUrl } from "@/lib/format";
 
@@ -31,7 +31,7 @@ export default async function InspectionDetailPage({
       </Button>
 
       <PageHeader title={job.ref} description={INSPECTION_TYPE[job.type]}>
-        <Badge tone={PRIORITY[job.priority].tone}>{PRIORITY[job.priority].label} priority</Badge>
+        <PrioritySelect inspectionId={job.id} initial={job.priority} />
         <SubmitReport inspectionId={job.id} />
         <Button asChild variant="secondary">
           <a href={`/api/pdf/report/${job.id}`} target="_blank" rel="noreferrer"><FileDown /> Generate PDF Report</a>
@@ -42,7 +42,7 @@ export default async function InspectionDetailPage({
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader><CardTitle>Status Workflow</CardTitle></CardHeader>
-            <CardContent><StatusWorkflow initial={job.status} /></CardContent>
+            <CardContent><StatusWorkflow inspectionId={job.id} initial={job.status} /></CardContent>
           </Card>
 
           <Card>

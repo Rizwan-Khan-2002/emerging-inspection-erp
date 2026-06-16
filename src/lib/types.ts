@@ -253,6 +253,7 @@ export interface FuelExpense {
 
 export interface InspectionReport {
   id: string;
+  inspection_id?: string;
   inspection_ref: string;
   client_name: string;
   type: InspectionType;

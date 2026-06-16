@@ -20,18 +20,18 @@ import type { DashboardStats, Role } from "@/lib/types";
 
 function statsFor(role: Role, s: DashboardStats) {
   const all = {
-    leads: { label: "Total Leads", value: s.totalLeads, icon: <Target /> },
-    clients: { label: "Active Clients", value: s.wonClients, icon: <Users /> },
-    projects: { label: "Active Projects", value: s.activeProjects, icon: <Activity /> },
-    revenue: { label: "Monthly Revenue", value: formatSAR(s.monthlyRevenue, { compact: true }), icon: <TrendingUp />, accent: true },
-    payroll: { label: "Payroll Expense", value: formatSAR(s.payrollExpense, { compact: true }), icon: <Wallet /> },
-    fuel: { label: "Fuel Expense", value: formatSAR(s.fuelExpense), icon: <Droplet /> },
-    inspectors: { label: "Active Inspectors", value: s.activeInspectors, icon: <Users /> },
-    pending: { label: "Pending Reports", value: s.pendingReports, icon: <FileCheck2 /> },
-    vehicles: { label: "Vehicles In Use", value: s.vehiclesInUse, icon: <Truck /> },
-    today: { label: "Inspections", value: s.todayInspections, icon: <ClipboardCheck />, accent: true },
-    ot: { label: "OT Hours (Month)", value: s.otHoursMonth, icon: <Clock /> },
-    fuelClaims: { label: "Fuel Claims Pending", value: s.fuelClaimsPending, icon: <Fuel /> },
+    leads: { label: "Total Leads", value: s.totalLeads, icon: <Target />, href: "/leads" },
+    clients: { label: "Active Clients", value: s.wonClients, icon: <Users />, href: "/clients" },
+    projects: { label: "Active Projects", value: s.activeProjects, icon: <Activity />, href: "/projects" },
+    revenue: { label: "Monthly Revenue", value: formatSAR(s.monthlyRevenue, { compact: true }), icon: <TrendingUp />, accent: true, href: "/invoices" },
+    payroll: { label: "Payroll Expense", value: formatSAR(s.payrollExpense, { compact: true }), icon: <Wallet />, href: "/payroll" },
+    fuel: { label: "Fuel Expense", value: formatSAR(s.fuelExpense), icon: <Droplet />, href: "/fuel" },
+    inspectors: { label: "Active Inspectors", value: s.activeInspectors, icon: <Users />, href: "/employees" },
+    pending: { label: "Pending Reports", value: s.pendingReports, icon: <FileCheck2 />, href: "/reports" },
+    vehicles: { label: "Vehicles In Use", value: s.vehiclesInUse, icon: <Truck />, href: "/vehicles" },
+    today: { label: "Inspections", value: s.todayInspections, icon: <ClipboardCheck />, accent: true, href: "/inspections" },
+    ot: { label: "OT Hours (Month)", value: s.otHoursMonth, icon: <Clock />, href: "/overtime" },
+    fuelClaims: { label: "Fuel Claims Pending", value: s.fuelClaimsPending, icon: <Fuel />, href: "/fuel" },
   };
   const map: Record<Role, (keyof typeof all)[]> = {
     super_admin: ["leads", "clients", "projects", "inspectors", "pending", "vehicles", "today", "fuelClaims"],
@@ -75,6 +75,7 @@ export default async function DashboardPage() {
               value={c.value}
               icon={c.icon}
               accent={"accent" in c ? (c.accent as boolean) : undefined}
+              href={"href" in c ? (c.href as string) : undefined}
             />
           </Tilt>
         ))}
