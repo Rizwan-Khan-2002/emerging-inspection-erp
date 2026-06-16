@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddEmployee } from "@/components/employees/add-employee";
+import { ImportExport } from "@/components/common/import-export";
+import { importEmployees } from "@/lib/actions/entities";
 import { getEmployees } from "@/lib/data";
 import { formatSAR } from "@/lib/format";
 import { initials } from "@/lib/utils";
@@ -23,6 +25,16 @@ export default async function EmployeesPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manpower records, salaries and assignments.">
+        <ImportExport
+          rows={employees.map((e) => ({
+            employee_code: e.employee_code, full_name: e.full_name, iqama_passport: e.iqama_passport ?? "",
+            position: e.position ?? "", department: e.department ?? "", basic_salary: e.basic_salary,
+            ot_rate: e.ot_rate, phone: e.phone ?? "", email: e.email ?? "", status: e.status,
+          }))}
+          filename="employees"
+          sheet="Employees"
+          importAction={importEmployees}
+        />
         <AddEmployee nextCode={nextCode} />
       </PageHeader>
       <Card>

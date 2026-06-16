@@ -1,6 +1,8 @@
 import { Building2 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { AddClient } from "@/components/clients/add-client";
+import { ImportExport } from "@/components/common/import-export";
+import { importClients } from "@/lib/actions/entities";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +16,16 @@ export default async function ClientsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Clients" description="Active client accounts, contracts and balances.">
+        <ImportExport
+          rows={clients.map((c) => ({
+            company_name: c.company_name, industry: c.industry ?? "", contact_person: c.contact_person ?? "",
+            email: c.email ?? "", phone: c.phone ?? "", city: c.city ?? "", country: c.country,
+            vat_number: c.vat_number ?? "", payment_terms: c.payment_terms ?? "",
+          }))}
+          filename="clients"
+          sheet="Clients"
+          importAction={importClients}
+        />
         <AddClient />
       </PageHeader>
       <Card>

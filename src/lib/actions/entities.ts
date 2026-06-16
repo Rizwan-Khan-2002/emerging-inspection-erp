@@ -112,6 +112,61 @@ export async function setApproval(
   return { ok: true };
 }
 
+const norm = (k: string) => k.trim().toLowerCase().replace(/[\s-]+/g, "_");
+type ImportRes = { ok: boolean; count: number; error?: string };
+
+async function bulkInsert(table: string, payload: Record<string, unknown>[], revalidate: string): Promise<ImportRes> {
+  if (payload.length === 0) return { ok: false, count: 0, error: "No valid rows found in the file." };
+  if (!isSupabaseConfigured) return { ok: true, count: payload.length };
+  const sb = await createClient();
+  if (!sb) return { ok: false, count: 0, error: "No database connection." };
+  const { error } = await sb.from(table).insert(payload);
+  if (error) return { ok: false, count: 0, error: error.message };
+  revalidatePath(revalidate);
+  return { ok: true, count: payload.length };
+}
+
+export async function importClients(rows: Record<string, unknown>[]): Promise<ImportRes> {
+  const payload = rows.map((r) => {
+    const o: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(r)) o[norm(k)] = v;
+    return {
+      company_name: String(o.company_name ?? o.company ?? "").trim(),
+      industry: o.industry ? String(o.industry) : null,
+      contact_person: o.contact_person ? String(o.contact_person) : null,
+      email: o.email ? String(o.email) : null,
+      phone: o.phone ? String(o.phone) : null,
+      city: o.city ? String(o.city) : null,
+      country: o.country ? String(o.country) : "Saudi Arabia",
+      vat_number: o.vat_number ? String(o.vat_number) : null,
+      payment_terms: o.payment_terms ? String(o.payment_terms) : "Net 30",
+    };
+  }).filter((c) => c.company_name);
+  return bulkInsert("clients", payload, "/clients");
+}
+
+export async function importEmployees(rows: Record<string, unknown>[]): Promise<ImportRes> {
+  const payload = rows.map((r, i) => {
+    const o: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(r)) o[norm(k)] = v;
+    const statusRaw = norm(String(o.status ?? "active"));
+    const status = ["active", "on_leave", "inactive"].includes(statusRaw) ? statusRaw : "active";
+    return {
+      employee_code: String(o.employee_code ?? o.code ?? `EMP-${String(i + 1).padStart(3, "0")}`).trim(),
+      full_name: String(o.full_name ?? o.name ?? "").trim(),
+      iqama_passport: o.iqama_passport ? String(o.iqama_passport) : null,
+      position: o.position ? String(o.position) : null,
+      department: o.department ? String(o.department) : null,
+      basic_salary: o.basic_salary ? Number(o.basic_salary) || 0 : 0,
+      ot_rate: o.ot_rate ? Number(o.ot_rate) || 0 : 0,
+      phone: o.phone ? String(o.phone) : null,
+      email: o.email ? String(o.email) : null,
+      status,
+    };
+  }).filter((e) => e.full_name);
+  return bulkInsert("employees", payload, "/employees");
+}
+
 export async function createExpense(v: import("@/lib/validations/entities").ExpenseFormValues): Promise<Res> {
   const res = await insert("expense_claims", {
     employee_id: v.employee_id || null,

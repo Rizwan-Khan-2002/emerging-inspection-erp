@@ -48,6 +48,22 @@ export async function getExpenses(): Promise<ExpenseClaim[]> {
   return data.map((e) => ({ ...e, employee_name: (e.employees as { full_name?: string } | null)?.full_name ?? "—" })) as ExpenseClaim[];
 }
 
+export interface DocumentRow {
+  id: string;
+  name: string;
+  file_url: string;
+  expiry_date?: string | null;
+  created_at?: string;
+}
+
+export async function getDocuments(): Promise<DocumentRow[]> {
+  if (!isSupabaseConfigured) return [];
+  const sb = await createClient();
+  if (!sb) return [];
+  const { data } = await sb.from("documents").select("*").order("created_at", { ascending: false });
+  return (data ?? []) as DocumentRow[];
+}
+
 export async function getProfiles(): Promise<UserProfile[]> {
   if (!isSupabaseConfigured) return Object.values(DEMO_USERS);
   const sb = await createClient();
@@ -193,6 +209,7 @@ export interface CompanySettings {
   email?: string;
   currency?: string;
   vat_percent?: number;
+  logo_url?: string | null;
 }
 
 const DEFAULT_COMPANY: CompanySettings = {
