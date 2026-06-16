@@ -12,10 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RevenueChart, InspectionTypeChart } from "@/components/dashboard/charts";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { getDashboardCharts, getDashboardStats, getInspections, getReports } from "@/lib/data";
 import { INSPECTION_TYPE, JOB_STATUS, PRIORITY, REPORT_STATUS, ROLE_LABELS } from "@/lib/constants";
 import { formatSAR } from "@/lib/format";
+import { normalizeLang, t } from "@/lib/i18n";
 import type { DashboardStats, Role } from "@/lib/types";
 
 function statsFor(role: Role, s: DashboardStats) {
@@ -47,9 +49,10 @@ function statsFor(role: Role, s: DashboardStats) {
 
 export default async function DashboardPage() {
   const user = (await getCurrentUser())!;
-  const [stats, inspections, reports, charts] = await Promise.all([
-    getDashboardStats(), getInspections(), getReports(), getDashboardCharts(),
+  const [stats, inspections, reports, charts, cookieStore] = await Promise.all([
+    getDashboardStats(), getInspections(), getReports(), getDashboardCharts(), cookies(),
   ]);
+  const lang = normalizeLang(cookieStore.get("lang")?.value);
   const cards = statsFor(user.role, stats);
   const showCharts = ["super_admin", "owner", "admin", "coordinator"].includes(user.role);
 
@@ -61,10 +64,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Welcome, ${user.full_name.split(" ")[0]}`}
-        description={`${ROLE_LABELS[user.role]} workspace`}
+        title={`${t(lang, "Welcome")}, ${user.full_name.split(" ")[0]}`}
+        description={`${ROLE_LABELS[user.role]} ${t(lang, "workspace")}`}
       >
-        <Badge tone="success"><span className="size-1.5 rounded-full bg-success" /> All systems operational</Badge>
+        <Badge tone="success"><span className="size-1.5 rounded-full bg-success" /> {t(lang, "All systems operational")}</Badge>
       </PageHeader>
 
       <Reveal className="grid grid-cols-2 gap-4 lg:grid-cols-4">

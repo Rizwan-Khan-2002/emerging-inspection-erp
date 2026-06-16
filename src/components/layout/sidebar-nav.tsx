@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavIcon } from "@/components/common/icon";
 import { NAV_GROUP_ORDER, navForRole } from "@/lib/constants";
+import { navLabel, groupLabel, type Lang } from "@/lib/i18n";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function SidebarNav({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
+export function SidebarNav({ role, lang = "en", onNavigate }: { role: Role; lang?: Lang; onNavigate?: () => void }) {
   const pathname = usePathname();
   const items = navForRole(role);
 
@@ -19,7 +20,7 @@ export function SidebarNav({ role, onNavigate }: { role: Role; onNavigate?: () =
         return (
           <div key={group} className="space-y-1">
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-steel-dim">
-              {group}
+              {groupLabel(lang, group)}
             </p>
             {groupItems.map((item) => {
               const active =
@@ -40,7 +41,7 @@ export function SidebarNav({ role, onNavigate }: { role: Role; onNavigate?: () =
                     name={item.icon}
                     className={cn("size-[18px] shrink-0", active ? "text-accent" : "text-steel-dim group-hover:text-foreground")}
                   />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate">{navLabel(lang, item.href, item.label)}</span>
                   {item.badge && (
                     <span className="ml-auto rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-navy">
                       {item.badge}

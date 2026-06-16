@@ -83,6 +83,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Arabic uses the Cairo font when the document language is Arabic. */
+html[lang="ar"] body {
+  font-family: var(--font-arabic), var(--font-sans);
+}
+
 /* Subtle industrial backdrop gradient */
 .app-shell-bg {
   background:

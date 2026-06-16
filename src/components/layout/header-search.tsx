@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { NavIcon } from "@/components/common/icon";
 import { navForRole } from "@/lib/constants";
+import { navLabel, t, type Lang } from "@/lib/i18n";
 import type { Role } from "@/lib/types";
 
 /** Quick navigation: type a module name and jump to it (Enter / click). */
-export function HeaderSearch({ role }: { role: Role }) {
+export function HeaderSearch({ role, lang = "en" }: { role: Role; lang?: Lang }) {
   const router = useRouter();
   const items = useMemo(() => navForRole(role), [role]);
   const [query, setQuery] = useState("");
@@ -19,9 +20,12 @@ export function HeaderSearch({ role }: { role: Role }) {
     const q = query.trim().toLowerCase();
     if (!q) return [];
     return items
-      .filter((i) => i.label.toLowerCase().includes(q) || i.group.toLowerCase().includes(q))
+      .filter((i) =>
+        i.label.toLowerCase().includes(q) ||
+        i.group.toLowerCase().includes(q) ||
+        navLabel(lang, i.href, i.label).toLowerCase().includes(q))
       .slice(0, 6);
-  }, [items, query]);
+  }, [items, query, lang]);
 
   function go(href: string) {
     setQuery("");
@@ -41,7 +45,7 @@ export function HeaderSearch({ role }: { role: Role }) {
           if (e.key === "Enter" && matches[0]) { e.preventDefault(); go(matches[0].href); }
           if (e.key === "Escape") setOpen(false);
         }}
-        placeholder="Search modules — inspections, employees, payroll…"
+        placeholder={t(lang, "Search modules — inspections, employees, payroll…")}
         className="h-10 w-full rounded-lg border border-border bg-navy-700 pl-9 pr-3 text-sm text-foreground placeholder:text-steel-dim focus:outline-none focus:ring-2 focus:ring-accent"
       />
       {open && matches.length > 0 && (
@@ -57,7 +61,7 @@ export function HeaderSearch({ role }: { role: Role }) {
               className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-steel hover:bg-card-hover hover:text-foreground"
             >
               <NavIcon name={m.icon} className="size-4 shrink-0 text-steel-dim" />
-              <span className="flex-1 truncate">{m.label}</span>
+              <span className="flex-1 truncate">{navLabel(lang, m.href, m.label)}</span>
               <span className="text-[10px] uppercase tracking-wider text-steel-dim">{m.group}</span>
             </button>
           ))}
