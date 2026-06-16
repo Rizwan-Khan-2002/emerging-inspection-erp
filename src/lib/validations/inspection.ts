@@ -7,6 +7,8 @@ export const inspectionSchema = z.object({
   scheduled_at: z.string().min(1, "Date & time is required"),
   priority: z.enum(["low", "medium", "high", "critical"]),
   status: z.enum(["pending", "assigned", "in_progress", "submitted", "under_review", "approved", "sent_to_client", "closed"]),
+  lat: z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().min(-90).max(90).optional()),
+  lng: z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().min(-180).max(180).optional()),
   remarks: z.string().optional(),
 });
 

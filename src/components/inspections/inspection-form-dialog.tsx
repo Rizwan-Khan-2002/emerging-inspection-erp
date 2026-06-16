@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LocateFixed, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,9 +30,24 @@ export function InspectionFormDialog({
   pending?: boolean;
 }) {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
-    useForm<InspectionFormValues>({ resolver: zodResolver(inspectionSchema), defaultValues: EMPTY });
+    useForm<InspectionFormValues>({ resolver: zodResolver(inspectionSchema) as Resolver<InspectionFormValues>, defaultValues: EMPTY });
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => { if (open) reset(EMPTY); }, [open, reset]);
+
+  function useMyLocation() {
+    if (!navigator.geolocation) { alert("Geolocation not supported on this device."); return; }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setValue("lat", Number(pos.coords.latitude.toFixed(6)));
+        setValue("lng", Number(pos.coords.longitude.toFixed(6)));
+        setLocating(false);
+      },
+      () => { setLocating(false); alert("Could not get location. Allow location access and retry."); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,6 +98,19 @@ export function InspectionFormDialog({
               </Select>
             </Field>
           </div>
+          <div className="rounded-lg border border-border bg-navy-700 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <Label>GPS Location <span className="font-normal text-steel-dim">(optional — shows on Field Ops map)</span></Label>
+              <Button type="button" variant="secondary" size="sm" onClick={useMyLocation} disabled={locating}>
+                {locating ? <Loader2 className="animate-spin" /> : <LocateFixed />} Use my location
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input {...register("lat")} type="number" step="any" placeholder="Latitude (e.g. 27.0174)" />
+              <Input {...register("lng")} type="number" step="any" placeholder="Longitude (e.g. 49.6225)" />
+            </div>
+          </div>
+
           <Field label="Remarks">
             <Textarea {...register("remarks")} placeholder="Scope, access notes, special instructions…" rows={3} />
           </Field>

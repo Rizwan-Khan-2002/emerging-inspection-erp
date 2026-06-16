@@ -23,6 +23,8 @@ export async function createInspection(
     scheduled_at: v.scheduled_at,
     priority: v.priority,
     status: v.status,
+    lat: v.lat ?? null,
+    lng: v.lng ?? null,
     remarks: v.remarks || null,
   });
   if (error) return { ok: false, error: error.message };
