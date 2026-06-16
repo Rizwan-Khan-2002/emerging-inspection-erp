@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ClipboardCheck, FolderKanban } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,8 @@ export default async function ProjectsPage() {
       ) : (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((p) => (
-          <Card key={p.id} className="transition-colors hover:border-accent/40">
+          <Link key={p.id} href={`/projects/${p.id}`} className="block">
+          <Card className="h-full transition-colors hover:border-accent/40 hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <span className="flex size-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
@@ -53,6 +55,7 @@ export default async function ProjectsPage() {
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
       )}

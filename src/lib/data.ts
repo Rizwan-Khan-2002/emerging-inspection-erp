@@ -225,6 +225,15 @@ export async function getProjects(): Promise<Project[]> {
   })) as Project[];
 }
 
+export async function getProjectById(id: string): Promise<Project | null> {
+  if (!isSupabaseConfigured) return mock.mockProjects.find((p) => p.id === id) ?? null;
+  const sb = await createClient();
+  if (!sb) return null;
+  const { data, error } = await sb.from("projects").select("*, clients(company_name)").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return { ...data, client_name: (data.clients as { company_name?: string } | null)?.company_name ?? "—" } as Project;
+}
+
 /* ----------------------------- Company settings -------------------------- */
 
 export interface CompanySettings {
