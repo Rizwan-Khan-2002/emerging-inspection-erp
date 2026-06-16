@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   ClientFormValues, EmployeeFormValues, ProjectFormValues, VehicleFormValues,
 } from "@/lib/validations/entities";
+import { notifyOps } from "./notifications";
 
 type Res = { ok: boolean; error?: string };
 
@@ -71,7 +72,7 @@ export async function createPayroll(v: import("@/lib/validations/entities").Payr
 }
 
 export async function createFuel(v: import("@/lib/validations/entities").FuelFormValues): Promise<Res> {
-  return insert("fuel_expenses", {
+  const res = await insert("fuel_expenses", {
     vehicle_id: v.vehicle_id,
     employee_id: v.employee_id || null,
     date: v.date,
@@ -79,6 +80,8 @@ export async function createFuel(v: import("@/lib/validations/entities").FuelFor
     amount: v.amount,
     approval: "pending",
   }, "/fuel");
+  if (res.ok) await notifyOps({ title: "Fuel claim submitted", body: `${v.amount} SAR — awaiting approval`, type: "warning" });
+  return res;
 }
 
 export async function createOvertime(v: import("@/lib/validations/entities").OvertimeFormValues): Promise<Res> {
@@ -110,13 +113,15 @@ export async function setApproval(
 }
 
 export async function createExpense(v: import("@/lib/validations/entities").ExpenseFormValues): Promise<Res> {
-  return insert("expense_claims", {
+  const res = await insert("expense_claims", {
     employee_id: v.employee_id || null,
     category: v.category,
     description: v.description || null,
     amount: v.amount,
     approval: "pending",
   }, "/expenses");
+  if (res.ok) await notifyOps({ title: "Expense claim submitted", body: `${v.category} · ${v.amount} SAR`, type: "warning" });
+  return res;
 }
 
 export async function createVehicle(v: VehicleFormValues): Promise<Res> {

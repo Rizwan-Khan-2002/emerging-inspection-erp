@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import type { Lead } from "@/lib/types";
 import type { LeadFormValues } from "@/lib/validations/lead";
+import { notifyOps } from "./notifications";
 
 type Result = { data?: Lead; error?: string };
 
@@ -26,6 +27,7 @@ export async function createLead(values: LeadFormValues): Promise<Result> {
         .select("*")
         .single();
       if (error) return { error: error.message };
+      await notifyOps({ title: "New lead added", body: `${(data as Lead).company_name}`, type: "info" });
       revalidatePath("/leads");
       return { data: data as Lead };
     }

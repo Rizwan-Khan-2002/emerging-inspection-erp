@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import type { InspectionFormValues } from "@/lib/validations/inspection";
+import { notifyOps } from "./notifications";
 
 export async function createInspection(
   v: InspectionFormValues
@@ -28,6 +29,7 @@ export async function createInspection(
     remarks: v.remarks || null,
   });
   if (error) return { ok: false, error: error.message };
+  await notifyOps({ title: "New inspection scheduled", body: ref, type: "info" });
   revalidatePath("/inspections");
   return { ok: true, ref };
 }
