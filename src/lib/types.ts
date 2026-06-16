@@ -148,6 +148,8 @@ export interface Inspection {
   scheduled_at: string;
   priority: Priority;
   status: JobStatus;
+  qm_type?: string | null;
+  material?: string | null;
   checklist?: ChecklistItem[];
   photos?: string[];
   remarks?: string;

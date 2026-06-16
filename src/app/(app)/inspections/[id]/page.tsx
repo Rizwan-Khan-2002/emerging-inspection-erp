@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, Building2, CalendarClock, Camera, FileDown, MapPin, User,
+  ArrowLeft, Building2, CalendarClock, Camera, FileDown, MapPin, User, ShieldCheck, Package,
 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,8 @@ export default async function InspectionDetailPage({
               <Detail icon={<User />} label="Inspector" value={job.inspector_name ?? "Unassigned"} />
               <Detail icon={<User />} label="Coordinator" value={job.coordinator_name ?? "—"} />
               <Detail icon={<CalendarClock />} label="Scheduled" value={formatDateTime(job.scheduled_at)} />
+              {job.qm_type && <Detail icon={<ShieldCheck />} label="QM Type" value={job.qm_type} />}
+              {job.material && <Detail icon={<Package />} label="Material / Component" value={job.material} />}
               {job.project_name && <Detail icon={<Building2 />} label="Project" value={job.project_name} />}
             </CardContent>
           </Card>

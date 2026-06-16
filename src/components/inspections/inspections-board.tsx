@@ -112,6 +112,7 @@ export function InspectionsBoard({
                 <TableRow>
                   <TableHead>Reference</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>QM / Material</TableHead>
                   <TableHead>Client / Site</TableHead>
                   <TableHead>Inspector</TableHead>
                   <TableHead>Scheduled</TableHead>
@@ -128,6 +129,12 @@ export function InspectionsBoard({
                       </Link>
                     </TableCell>
                     <TableCell className="text-sm">{INSPECTION_TYPE[i.type]}</TableCell>
+                    <TableCell className="text-xs text-steel">
+                      {i.qm_type && <span className="text-accent">{i.qm_type}</span>}
+                      {i.qm_type && i.material && " · "}
+                      {i.material}
+                      {!i.qm_type && !i.material && "—"}
+                    </TableCell>
                     <TableCell>
                       <p className="text-sm">{i.client_name}</p>
                       <p className="flex items-center gap-1 text-xs text-steel-dim">

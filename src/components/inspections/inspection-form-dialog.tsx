@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { INSPECTION_TYPE, JOB_STATUS, PRIORITY } from "@/lib/constants";
-import { inspectionSchema, type InspectionFormValues } from "@/lib/validations/inspection";
+import { inspectionSchema, type InspectionFormValues, QM_TYPES, MATERIAL_TYPES } from "@/lib/validations/inspection";
 
 const EMPTY: InspectionFormValues = {
   type: "scaffolding", client_id: "", site_location: "",
@@ -98,6 +98,27 @@ export function InspectionFormDialog({
               </Select>
             </Field>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="QM Type (mechanical approval)">
+              <Select value={watch("qm_type") || "none"} onValueChange={(v) => setValue("qm_type", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select QM" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— None —</SelectItem>
+                  {QM_TYPES.map((q) => <SelectItem key={q} value={q}>{q}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Material / Component">
+              <Select value={watch("material") || "none"} onValueChange={(v) => setValue("material", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select material" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— None —</SelectItem>
+                  {MATERIAL_TYPES.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
           <div className="rounded-lg border border-border bg-navy-700 p-3">
             <div className="mb-2 flex items-center justify-between">
               <Label>GPS Location <span className="font-normal text-steel-dim">(optional — shows on Field Ops map)</span></Label>
