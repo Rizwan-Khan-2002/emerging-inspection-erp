@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { coldEmail, followUpEmail } from "@/lib/ai-templates";
+import { logLeadActivity } from "@/lib/actions/lead-activities";
 import type { Lead } from "@/lib/types";
 
 export function AiEmailDialog({
@@ -96,7 +97,9 @@ export function AiEmailDialog({
             {copied ? <Check className="text-success" /> : <Copy />} {copied ? "Copied" : "Copy"}
           </Button>
           <Button asChild>
-            <a href={mailto}><Mail /> Open in mail client</a>
+            <a href={mailto} onClick={() => { void logLeadActivity(lead!.id, "email", subject || "Email sent", "Opened in mail client from CRM"); }}>
+              <Mail /> Open in mail client
+            </a>
           </Button>
         </div>
       </DialogContent>

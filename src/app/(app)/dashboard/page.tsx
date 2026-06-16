@@ -11,8 +11,9 @@ import { Tilt } from "@/components/common/tilt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RevenueChart, InspectionTypeChart } from "@/components/dashboard/charts";
 import { getCurrentUser } from "@/lib/auth";
-import { getDashboardStats, getInspections, getReports } from "@/lib/data";
+import { getDashboardCharts, getDashboardStats, getInspections, getReports } from "@/lib/data";
 import { INSPECTION_TYPE, JOB_STATUS, PRIORITY, REPORT_STATUS, ROLE_LABELS } from "@/lib/constants";
 import { formatSAR } from "@/lib/format";
 import type { DashboardStats, Role } from "@/lib/types";
@@ -46,10 +47,11 @@ function statsFor(role: Role, s: DashboardStats) {
 
 export default async function DashboardPage() {
   const user = (await getCurrentUser())!;
-  const [stats, inspections, reports] = await Promise.all([
-    getDashboardStats(), getInspections(), getReports(),
+  const [stats, inspections, reports, charts] = await Promise.all([
+    getDashboardStats(), getInspections(), getReports(), getDashboardCharts(),
   ]);
   const cards = statsFor(user.role, stats);
+  const showCharts = ["super_admin", "owner", "admin", "coordinator"].includes(user.role);
 
   const upcoming = inspections.slice(0, 5);
   const pendingReports = reports.filter((r) =>
@@ -77,6 +79,31 @@ export default async function DashboardPage() {
           </Tilt>
         ))}
       </Reveal>
+
+      {showCharts && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><TrendingUp className="size-4 text-accent" /> Revenue vs Expense <span className="text-xs font-normal text-steel-dim">· last 6 months</span></CardTitle>
+            </CardHeader>
+            <CardContent>
+              {charts.revenueSeries.some((m) => m.revenue || m.expense)
+                ? <RevenueChart data={charts.revenueSeries} />
+                : <p className="py-16 text-center text-sm text-steel-dim">No invoice or expense data yet.</p>}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><ClipboardCheck className="size-4 text-info" /> Inspections by Type</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {charts.inspectionsByType.length
+                ? <InspectionTypeChart data={charts.inspectionsByType} />
+                : <p className="py-16 text-center text-sm text-steel-dim">No inspections yet.</p>}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

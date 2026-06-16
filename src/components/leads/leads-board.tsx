@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   MessageCircle, MoreHorizontal, Pencil, Plus, Search, Sparkles, Target, Phone,
-  FileDown, FileUp, Loader2,
+  FileDown, FileUp, Loader2, History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/common/status-badge";
 import { EmptyState } from "@/components/common/empty-state";
 import { LeadFormDialog } from "./lead-form-dialog";
 import { AiEmailDialog } from "./ai-email-dialog";
+import { LeadTimeline } from "./lead-timeline";
 import { LEAD_SOURCE_LABELS, LEAD_STATUS } from "@/lib/constants";
 import { formatDate, formatSAR, whatsappUrl } from "@/lib/format";
 import { whatsappMessage } from "@/lib/ai-templates";
@@ -36,6 +37,7 @@ export function LeadsBoard({ initialLeads }: { initialLeads: Lead[] }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
   const [aiLead, setAiLead] = useState<Lead | null>(null);
+  const [timelineLead, setTimelineLead] = useState<Lead | null>(null);
   const [, startTransition] = useTransition();
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -202,6 +204,9 @@ export function LeadsBoard({ initialLeads }: { initialLeads: Lead[] }) {
                           <DropdownMenuItem onSelect={() => { setEditing(l); setFormOpen(true); }}>
                             <Pencil /> Edit lead
                           </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => setTimelineLead(l)}>
+                            <History /> Activity timeline
+                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => setAiLead(l)}>
                             <Sparkles /> AI email
                           </DropdownMenuItem>
@@ -231,6 +236,7 @@ export function LeadsBoard({ initialLeads }: { initialLeads: Lead[] }) {
 
       <LeadFormDialog open={formOpen} onOpenChange={setFormOpen} initial={editing} onSave={handleSave} />
       <AiEmailDialog open={!!aiLead} onOpenChange={(v) => !v && setAiLead(null)} lead={aiLead} />
+      <LeadTimeline lead={timelineLead} open={!!timelineLead} onOpenChange={(v) => !v && setTimelineLead(null)} />
     </div>
   );
 }

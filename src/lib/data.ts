@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import * as mock from "@/lib/mock-data";
 import { DEMO_USERS } from "@/lib/auth";
+import { INSPECTION_TYPE } from "@/lib/constants";
 import type {
   AttendanceRecord, Client, DashboardStats, Employee, FuelExpense, Inspection,
   InspectionReport, Invoice, Lead, OvertimeRecord, PayrollRecord, Project,
@@ -260,7 +261,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     return count ?? 0;
   }
 
-  const [leads, clients, projects, inspectors, pendingReports, vehicles, inspections, fuelPending] =
+  const sum = async (table: string, col: string): Promise<number> => {
+    const { data } = await sb!.from(table).select(col);
+    const rows = (data ?? []) as unknown as Record<string, unknown>[];
+    return rows.reduce((s, r) => s + (Number(r[col]) || 0), 0);
+  };
+
+  const [leads, clients, projects, inspectors, pendingReports, vehicles, inspections, fuelPending,
+    monthlyRevenue, payrollExpense, fuelExpense, otHours] =
     await Promise.all([
       cnt("leads"),
       cnt("clients"),
@@ -270,21 +278,79 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       cnt("vehicles", "status", "active"),
       cnt("inspections"),
       cnt("fuel_expenses", "approval", "pending"),
+      sum("invoices", "total"),
+      sum("payroll", "net_salary"),
+      sum("fuel_expenses", "amount"),
+      sum("overtime", "ot_hours"),
     ]);
 
   return {
     totalLeads: leads,
     wonClients: clients,
     activeProjects: projects,
-    monthlyRevenue: 0,
-    payrollExpense: 0,
-    fuelExpense: 0,
+    monthlyRevenue,
+    payrollExpense,
+    fuelExpense,
     activeInspectors: inspectors,
     pendingReports,
     vehiclesInUse: vehicles,
     todayInspections: inspections,
-    otHoursMonth: 0,
+    otHoursMonth: Math.round(otHours * 10) / 10,
     fuelClaimsPending: fuelPending,
+  };
+}
+
+/* --------------------------- Dashboard charts ---------------------------- */
+
+export interface DashboardCharts {
+  revenueSeries: { month: string; revenue: number; expense: number }[];
+  inspectionsByType: { type: string; count: number }[];
+}
+
+export async function getDashboardCharts(): Promise<DashboardCharts> {
+  if (!isSupabaseConfigured) {
+    return { revenueSeries: mock.revenueSeries, inspectionsByType: mock.inspectionsByType };
+  }
+  const sb = await createClient();
+  if (!sb) return { revenueSeries: [], inspectionsByType: [] };
+
+  // Build the last 6 month buckets (oldest → newest).
+  const now = new Date();
+  const months = Array.from({ length: 6 }, (_, n) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - n), 1);
+    return {
+      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      month: d.toLocaleString("en-US", { month: "short" }),
+      revenue: 0,
+      expense: 0,
+    };
+  });
+  const bucket = (dateStr?: string | null) =>
+    dateStr ? months.findIndex((m) => m.key === String(dateStr).slice(0, 7)) : -1;
+
+  const [invoices, fuel, payroll, expenses, inspections] = await Promise.all([
+    sb.from("invoices").select("total,created_at"),
+    sb.from("fuel_expenses").select("amount,date"),
+    sb.from("payroll").select("net_salary,period"),
+    sb.from("expense_claims").select("amount,created_at"),
+    sb.from("inspections").select("type"),
+  ]);
+
+  (invoices.data ?? []).forEach((r) => { const i = bucket(r.created_at); if (i >= 0) months[i].revenue += Number(r.total) || 0; });
+  (fuel.data ?? []).forEach((r) => { const i = bucket(r.date); if (i >= 0) months[i].expense += Number(r.amount) || 0; });
+  (expenses.data ?? []).forEach((r) => { const i = bucket(r.created_at); if (i >= 0) months[i].expense += Number(r.amount) || 0; });
+  (payroll.data ?? []).forEach((r) => { const i = months.findIndex((m) => m.key === r.period); if (i >= 0) months[i].expense += Number(r.net_salary) || 0; });
+
+  const counts: Record<string, number> = {};
+  (inspections.data ?? []).forEach((r) => { counts[r.type] = (counts[r.type] ?? 0) + 1; });
+  const inspectionsByType = Object.entries(counts).map(([k, count]) => ({
+    type: INSPECTION_TYPE[k as keyof typeof INSPECTION_TYPE] ?? k,
+    count,
+  }));
+
+  return {
+    revenueSeries: months.map(({ month, revenue, expense }) => ({ month, revenue, expense })),
+    inspectionsByType,
   };
 }
 

@@ -21,12 +21,13 @@ const EMPTY: InspectionFormValues = {
 };
 
 export function InspectionFormDialog({
-  open, onOpenChange, onSave, clients, pending,
+  open, onOpenChange, onSave, clients, projects = [], pending,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSave: (values: InspectionFormValues) => void;
   clients: { id: string; company_name: string }[];
+  projects?: { id: string; name: string; client_id: string }[];
   pending?: boolean;
 }) {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
@@ -72,6 +73,17 @@ export function InspectionFormDialog({
                 <SelectTrigger><SelectValue placeholder={clients.length ? "Select client" : "Add a client first"} /></SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Project (optional)">
+              <Select value={watch("project_id") || "none"} onValueChange={(v) => setValue("project_id", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Link to a project" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— No project —</SelectItem>
+                  {projects
+                    .filter((p) => !watch("client_id") || p.client_id === watch("client_id"))
+                    .map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>

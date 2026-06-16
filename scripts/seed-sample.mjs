@@ -138,6 +138,58 @@ async function main() {
   const insByRef = Object.fromEntries(inspections.map((i) => [i.ref, i.id]));
   console.log("  ✓ inspections");
 
+  // ---- Projects ------------------------------------------------------
+  const abqaiqId = await findOrCreate("projects", "name", "Abqaiq Shutdown 2026", {
+    name: "Abqaiq Shutdown 2026", client_id: aramcoId, site_location: "Abqaiq Plant – Units 040-045",
+    status: "active", start_date: "2026-06-01", end_date: "2026-08-15", budget: 1500000,
+  });
+  const jubailId = await findOrCreate("projects", "name", "Jubail Fabrication QA", {
+    name: "Jubail Fabrication QA", client_id: sabicId, site_location: "Jubail – Fabrication Yard 3",
+    status: "active", start_date: "2026-05-15", end_date: "2026-09-30", budget: 450000,
+  });
+  console.log("  ✓ projects");
+
+  // ---- Invoices (spread across months for the revenue chart) ---------
+  await upsert("invoices", [
+    { number: "INV-2026-5001", client_id: aramcoId, amount: 185000, vat: 27750, status: "paid", due_date: "2026-04-30", created_at: "2026-04-10T09:00:00Z" },
+    { number: "INV-2026-5002", client_id: sabicId, amount: 42000, vat: 6300, status: "sent", due_date: "2026-06-12", created_at: "2026-05-12T09:00:00Z" },
+    { number: "INV-2026-5003", client_id: aramcoId, amount: 96000, vat: 14400, status: "paid", due_date: "2026-07-05", created_at: "2026-06-05T09:00:00Z" },
+  ], "number");
+  console.log("  ✓ invoices");
+
+  // ---- Link inspections to projects ----------------------------------
+  await rest("PATCH", "inspections?ref=eq.INS-2026-0101", { project_id: abqaiqId }, "return=minimal");
+  await rest("PATCH", "inspections?ref=eq.INS-2026-0103", { project_id: abqaiqId }, "return=minimal");
+  await rest("PATCH", "inspections?ref=eq.INS-2026-0102", { project_id: jubailId }, "return=minimal");
+  console.log("  ✓ inspections linked to projects");
+
+  // ---- Documents (expiry alerts: expired / soon / valid) -------------
+  const SAMPLE_PDF = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+  await seedIfEmpty("documents", [
+    { owner_type: null, owner_id: null, name: "ISO 9001:2015 Certificate.pdf", file_url: SAMPLE_PDF, expiry_date: "2027-03-31" },
+    { owner_type: "client", owner_id: aramcoId, name: "Aramco Vendor Approval.pdf", file_url: SAMPLE_PDF, expiry_date: "2026-07-08" },
+    { owner_type: "employee", owner_id: empByCode["EMP-101"], name: "Welder Qualification - M. Iqbal.pdf", file_url: SAMPLE_PDF, expiry_date: "2026-05-20" },
+  ]);
+  console.log("  ✓ documents");
+
+  // ---- Sample lead + activity history (timeline demo) ----------------
+  const leadId = await findOrCreate("leads", "company_name", "Ma'aden Phosphate", {
+    company_name: "Ma'aden Phosphate", industry: "Mining", contact_person: "Aisha Khan",
+    position: "QA/QC Head", email: "a.khan@maaden.com", phone: "+966 13 357 0000",
+    country: "Saudi Arabia", city: "Ras Al Khair", source: "linkedin", status: "negotiation",
+    estimated_value: 650000, follow_up_date: "2026-06-25", notes: "Interested in annual QA/QC contract.",
+  });
+  const existingAct = await rest("GET", `lead_activities?lead_id=eq.${leadId}&select=id&limit=1`);
+  if (!existingAct?.length) {
+    await rest("POST", "lead_activities", [
+      { lead_id: leadId, type: "note", subject: "Lead created", body: "Added to pipeline · status: interested" },
+      { lead_id: leadId, type: "call", subject: "Intro call", body: "Discussed annual QA/QC scope, sent capability profile." },
+      { lead_id: leadId, type: "email", subject: "Quotation sent", body: "Emailed QT-2026 for QA/QC contract." },
+      { lead_id: leadId, type: "note", subject: "Status changed", body: "interested → negotiation" },
+    ], "return=minimal");
+  }
+  console.log("  ✓ lead + activities");
+
   // ---- Reports (review → approve workflow) ---------------------------
   await seedIfEmpty("reports", [
     {

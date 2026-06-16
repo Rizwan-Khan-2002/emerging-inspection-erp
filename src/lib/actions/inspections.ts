@@ -20,6 +20,7 @@ export async function createInspection(
     ref,
     type: v.type,
     client_id: v.client_id || null,
+    project_id: v.project_id || null,
     site_location: v.site_location,
     scheduled_at: v.scheduled_at,
     priority: v.priority,

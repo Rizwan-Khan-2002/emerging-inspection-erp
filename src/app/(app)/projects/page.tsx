@@ -1,10 +1,10 @@
-import { FolderKanban } from "lucide-react";
+import { ClipboardCheck, FolderKanban } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/common/empty-state";
 import { AddProject } from "@/components/projects/add-project";
-import { getClients, getProjects } from "@/lib/data";
+import { getClients, getInspections, getProjects } from "@/lib/data";
 import { formatDate, formatSAR } from "@/lib/format";
 import type { BadgeTone } from "@/lib/constants";
 
@@ -18,7 +18,9 @@ const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
 };
 
 export default async function ProjectsPage() {
-  const [projects, clients] = await Promise.all([getProjects(), getClients()]);
+  const [projects, clients, inspections] = await Promise.all([getProjects(), getClients(), getInspections()]);
+  const inspectionCount = (projectId: string) =>
+    inspections.filter((i) => i.project_id === projectId).length;
   return (
     <div className="space-y-6">
       <PageHeader title="Projects" description="Shutdowns, contracts and ongoing engagements.">
@@ -45,6 +47,10 @@ export default async function ProjectsPage() {
               <Row label="Start" value={formatDate(p.start_date)} />
               <Row label="End" value={formatDate(p.end_date)} />
               <Row label="Budget" value={p.budget ? formatSAR(p.budget, { compact: true }) : "—"} accent />
+              <div className="flex items-center justify-between border-t border-border pt-2">
+                <span className="flex items-center gap-1.5 text-steel-dim"><ClipboardCheck className="size-3.5" /> Inspections</span>
+                <Badge tone={inspectionCount(p.id) ? "info" : "neutral"}>{inspectionCount(p.id)} linked</Badge>
+              </div>
             </CardContent>
           </Card>
         ))}

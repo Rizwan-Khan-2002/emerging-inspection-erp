@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { inspectionsByType, revenueSeries } from "@/lib/mock-data";
 
 const NAVY = "#102437";
 const BORDER = "#1c3650";
@@ -28,10 +27,10 @@ const tooltipStyle = {
   fontSize: 12,
 };
 
-export function RevenueChart() {
+export function RevenueChart({ data }: { data: { month: string; revenue: number; expense: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={revenueSeries} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
+      <AreaChart data={data} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
         <defs>
           <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={ACCENT} stopOpacity={0.5} />
@@ -54,17 +53,17 @@ export function RevenueChart() {
   );
 }
 
-export function InspectionTypeChart() {
+export function InspectionTypeChart({ data }: { data: { type: string; count: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={inspectionsByType} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
         <XAxis dataKey="type" stroke={STEEL} fontSize={11} tickLine={false} axisLine={false}
           interval={0} angle={-15} textAnchor="end" height={50} />
         <YAxis stroke={STEEL} fontSize={11} tickLine={false} axisLine={false} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: NAVY }} />
         <Bar dataKey="count" radius={[6, 6, 0, 0]} name="Inspections">
-          {inspectionsByType.map((_, i) => (
+          {data.map((_, i) => (
             <Cell key={i} fill={i % 2 === 0 ? ACCENT : INFO} />
           ))}
         </Bar>

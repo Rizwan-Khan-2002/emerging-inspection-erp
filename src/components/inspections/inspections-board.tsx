@@ -24,10 +24,11 @@ import type { Inspection, JobStatus } from "@/lib/types";
 import type { InspectionFormValues } from "@/lib/validations/inspection";
 
 export function InspectionsBoard({
-  initial, clients,
+  initial, clients, projects = [],
 }: {
   initial: Inspection[];
   clients: { id: string; company_name: string }[];
+  projects?: { id: string; name: string; client_id: string }[];
 }) {
   const router = useRouter();
   const [items, setItems] = useState<Inspection[]>(initial);
@@ -153,7 +154,7 @@ export function InspectionsBoard({
         </Card>
       )}
 
-      <InspectionFormDialog open={formOpen} onOpenChange={setFormOpen} onSave={handleSave} clients={clients} pending={pending} />
+      <InspectionFormDialog open={formOpen} onOpenChange={setFormOpen} onSave={handleSave} clients={clients} projects={projects} pending={pending} />
     </div>
   );
 }

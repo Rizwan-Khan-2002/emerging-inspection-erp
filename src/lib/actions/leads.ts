@@ -27,6 +27,10 @@ export async function createLead(values: LeadFormValues): Promise<Result> {
         .select("*")
         .single();
       if (error) return { error: error.message };
+      await sb.from("lead_activities").insert({
+        lead_id: (data as Lead).id, type: "note", subject: "Lead created",
+        body: `Added to pipeline · status: ${(data as Lead).status}`, created_by: user?.id ?? null,
+      });
       await notifyOps({ title: "New lead added", body: `${(data as Lead).company_name}`, type: "info" });
       revalidatePath("/leads");
       return { data: data as Lead };
@@ -101,7 +105,9 @@ export async function updateLead(id: string, values: LeadFormValues): Promise<Re
 
   if (isSupabaseConfigured) {
     const sb = await createClient();
+    const user = await getCurrentUser();
     if (sb) {
+      const { data: prev } = await sb.from("leads").select("status").eq("id", id).single();
       const { data, error } = await sb
         .from("leads")
         .update(payload)
@@ -109,6 +115,12 @@ export async function updateLead(id: string, values: LeadFormValues): Promise<Re
         .select("*")
         .single();
       if (error) return { error: error.message };
+      if (prev && (prev as { status?: string }).status !== values.status) {
+        await sb.from("lead_activities").insert({
+          lead_id: id, type: "note", subject: "Status changed",
+          body: `${(prev as { status?: string }).status} → ${values.status}`, created_by: user?.id ?? null,
+        });
+      }
       revalidatePath("/leads");
       return { data: data as Lead };
     }
