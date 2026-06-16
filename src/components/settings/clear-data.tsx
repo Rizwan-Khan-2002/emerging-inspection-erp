@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, Check, AlertTriangle } from "lucide-react";
+import { Loader2, Check, AlertTriangle, DatabaseZap, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -40,30 +40,36 @@ export function ClearData() {
   }
 
   return (
-    <Card className="border-danger/30">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-danger"><Trash2 className="size-4" /> Danger Zone</CardTitle>
-        <p className="text-sm text-muted">Remove all sample / demo records so you can start with your own real data. This cannot be undone.</p>
+        <CardTitle className="flex items-center gap-2">
+          <DatabaseZap className="size-4 text-steel" /> Workspace Data
+        </CardTitle>
+        <p className="text-sm text-muted">
+          Reset all operational records (leads, clients, inspections, payroll and more) to start fresh with your own data. User accounts and settings are preserved.
+        </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setResult(null); }}>
           <DialogTrigger asChild>
-            <Button variant="danger"><Trash2 /> Clear all sample data</Button>
+            <Button variant="outline" className="border-danger/30 text-danger hover:bg-danger/10">
+              <RotateCcw /> Reset workspace data
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             {!result ? (
               <>
                 <DialogHeader>
-                  <DialogTitle>Clear all sample data?</DialogTitle>
+                  <DialogTitle>Reset workspace data?</DialogTitle>
                   <DialogDescription>
-                    This permanently deletes all leads, clients, employees, vehicles, inspections, reports and other records.
-                    Your user accounts and login are NOT affected.
+                    This permanently removes all leads, clients, employees, vehicles, inspections, reports and other operational records.
+                    Your user accounts, roles and company settings are not affected. This action cannot be undone.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                   <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
                   <Button variant="danger" disabled={pending} onClick={run}>
-                    {pending && <Loader2 className="animate-spin" />} Yes, clear everything
+                    {pending && <Loader2 className="animate-spin" />} Reset data
                   </Button>
                 </DialogFooter>
               </>
