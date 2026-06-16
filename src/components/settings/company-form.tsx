@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,27 +45,33 @@ export function CompanyForm({ initial }: { initial: CompanySettings }) {
       if (logoRef.current) logoRef.current.value = "";
     }
   }
-  const { register, handleSubmit, formState: { errors } } = useForm<CompanyFormValues>({
-    resolver: zodResolver(companySchema) as Resolver<CompanyFormValues>,
-    defaultValues: {
-      company_name: initial.company_name ?? "",
-      legal_name: initial.legal_name ?? "",
-      address: initial.address ?? "",
-      city: initial.city ?? "",
-      country: initial.country ?? "Saudi Arabia",
-      vat_number: initial.vat_number ?? "",
-      phone: initial.phone ?? "",
-      email: initial.email ?? "",
-      currency: initial.currency ?? "SAR",
-      vat_percent: initial.vat_percent ?? 15,
-    },
+  const toValues = (s: CompanySettings): CompanyFormValues => ({
+    company_name: s.company_name ?? "",
+    legal_name: s.legal_name ?? "",
+    address: s.address ?? "",
+    city: s.city ?? "",
+    country: s.country ?? "Saudi Arabia",
+    vat_number: s.vat_number ?? "",
+    phone: s.phone ?? "",
+    email: s.email ?? "",
+    currency: s.currency ?? "SAR",
+    vat_percent: s.vat_percent ?? 15,
   });
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CompanyFormValues>({
+    resolver: zodResolver(companySchema) as Resolver<CompanyFormValues>,
+    defaultValues: toValues(initial),
+  });
+
+  // Keep the form in sync with the saved data (after refresh / external change).
+  useEffect(() => { reset(toValues(initial)); setLogo(initial.logo_url ?? null); }, [initial]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function onSubmit(values: CompanyFormValues) {
     setErr(null); setSaved(false);
     start(async () => {
       const res = await updateCompanySettings(values);
       if (!res.ok) { setErr(res.error ?? "Failed to save"); return; }
+      reset(values); // baseline becomes the saved values
       setSaved(true);
       router.refresh();
       setTimeout(() => setSaved(false), 2500);
