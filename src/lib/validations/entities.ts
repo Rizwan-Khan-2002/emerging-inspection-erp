@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const money = () => z.coerce.number().min(0).optional();
+
 export const employeeSchema = z.object({
   employee_code: z.string().min(1, "Code is required"),
   full_name: z.string().min(2, "Name is required"),
@@ -8,6 +10,13 @@ export const employeeSchema = z.object({
   department: z.string().optional(),
   basic_salary: z.coerce.number().min(0),
   ot_rate: z.coerce.number().min(0),
+  ot_rate_holiday: money(),
+  allow_food: money(),
+  allow_accommodation: money(),
+  allow_telephone: money(),
+  allow_carwash: money(),
+  deduct_fuel: money(),
+  deduct_car_emi: money(),
   phone: z.string().optional(),
   email: z.string().email("Valid email").optional().or(z.literal("")),
   bank_iban: z.string().optional(),

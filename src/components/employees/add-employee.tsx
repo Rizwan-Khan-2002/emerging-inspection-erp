@@ -17,7 +17,10 @@ import { createEmployee } from "@/lib/actions/entities";
 
 const EMPTY: EmployeeFormValues = {
   employee_code: "", full_name: "", iqama_passport: "", position: "", department: "",
-  basic_salary: 0, ot_rate: 0, phone: "", email: "", bank_iban: "", status: "active", join_date: "",
+  basic_salary: 0, ot_rate: 0, ot_rate_holiday: 0,
+  allow_food: 0, allow_accommodation: 0, allow_telephone: 0, allow_carwash: 0,
+  deduct_fuel: 0, deduct_car_emi: 0,
+  phone: "", email: "", bank_iban: "", status: "active", join_date: "",
 };
 
 export function AddEmployee({ nextCode }: { nextCode: string }) {
@@ -65,11 +68,30 @@ export function AddEmployee({ nextCode }: { nextCode: string }) {
               </Select>
             </F>
             <F label="Basic Salary (SAR)"><Input type="number" {...register("basic_salary")} /></F>
-            <F label="OT Rate (SAR/hr)"><Input type="number" {...register("ot_rate")} /></F>
+            <F label="OT Rate — Normal (SAR/hr)"><Input type="number" {...register("ot_rate")} /></F>
+            <F label="OT Rate — Holiday (SAR/hr)"><Input type="number" {...register("ot_rate_holiday")} /></F>
             <F label="Phone"><Input {...register("phone")} placeholder="+9665…" /></F>
             <F label="Email" e={errors.email?.message}><Input {...register("email")} type="email" /></F>
             <F label="Bank IBAN"><Input {...register("bank_iban")} placeholder="SA…" /></F>
             <F label="Join Date"><Input type="date" {...register("join_date")} /></F>
+          </div>
+
+          <div className="rounded-lg border border-border bg-navy-700 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-steel-dim">Allowances (monthly, SAR)</p>
+            <div className="grid gap-3 sm:grid-cols-4">
+              <F label="Food"><Input type="number" {...register("allow_food")} /></F>
+              <F label="Accommodation (HRA)"><Input type="number" {...register("allow_accommodation")} /></F>
+              <F label="Telephone"><Input type="number" {...register("allow_telephone")} /></F>
+              <F label="Car Wash"><Input type="number" {...register("allow_carwash")} /></F>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-navy-700 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-steel-dim">Deductions (monthly, SAR)</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <F label="Fuel Bill"><Input type="number" {...register("deduct_fuel")} /></F>
+              <F label="Car EMI"><Input type="number" {...register("deduct_car_emi")} /></F>
+            </div>
           </div>
           {err && <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">{err}</p>}
           <DialogFooter>

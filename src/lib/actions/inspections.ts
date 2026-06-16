@@ -24,6 +24,7 @@ export async function createInspection(
     scheduled_at: v.scheduled_at,
     priority: v.priority,
     status: v.status,
+    approval_type: v.approval_type || null,
     qm_type: v.qm_type || null,
     material: v.material || null,
     lat: v.lat ?? null,

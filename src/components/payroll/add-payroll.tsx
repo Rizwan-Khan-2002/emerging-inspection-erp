@@ -15,7 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { payrollSchema, type PayrollFormValues } from "@/lib/validations/entities";
 import { createPayroll } from "@/lib/actions/entities";
 
-export function AddPayroll({ employees }: { employees: { id: string; full_name: string; basic_salary: number }[] }) {
+export function AddPayroll({ employees }: {
+  employees: { id: string; full_name: string; basic_salary: number; allowances?: number; deductions?: number }[];
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -47,7 +49,11 @@ export function AddPayroll({ employees }: { employees: { id: string; full_name: 
               <Select value={watch("employee_id")} onValueChange={(v) => {
                 setValue("employee_id", v);
                 const e = employees.find((x) => x.id === v);
-                if (e) setValue("basic_salary", e.basic_salary);
+                if (e) {
+                  setValue("basic_salary", e.basic_salary);
+                  setValue("allowances", e.allowances ?? 0);
+                  setValue("deductions", e.deductions ?? 0);
+                }
               }}>
                 <SelectTrigger><SelectValue placeholder={employees.length ? "Select" : "Add employees first"} /></SelectTrigger>
                 <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}</SelectContent>

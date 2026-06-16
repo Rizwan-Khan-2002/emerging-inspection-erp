@@ -148,6 +148,7 @@ export interface Inspection {
   scheduled_at: string;
   priority: Priority;
   status: JobStatus;
+  approval_type?: "aramco" | "non_aramco" | null;
   qm_type?: string | null;
   material?: string | null;
   checklist?: ChecklistItem[];
@@ -171,7 +172,14 @@ export interface Employee {
   position: string;
   department?: string;
   basic_salary: number;
-  ot_rate: number;
+  ot_rate: number;                 // Normal OT rate (per hour)
+  ot_rate_holiday?: number;        // Holiday / Friday OT rate (per hour)
+  allow_food?: number;
+  allow_accommodation?: number;    // HRA
+  allow_telephone?: number;
+  allow_carwash?: number;
+  deduct_fuel?: number;
+  deduct_car_emi?: number;
   phone?: string;
   email?: string;
   bank_iban?: string;

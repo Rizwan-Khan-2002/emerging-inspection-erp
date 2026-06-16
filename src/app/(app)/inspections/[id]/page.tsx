@@ -76,6 +76,7 @@ export default async function InspectionDetailPage({
               <Detail icon={<User />} label="Inspector" value={job.inspector_name ?? "Unassigned"} />
               <Detail icon={<User />} label="Coordinator" value={job.coordinator_name ?? "—"} />
               <Detail icon={<CalendarClock />} label="Scheduled" value={formatDateTime(job.scheduled_at)} />
+              {job.approval_type && <Detail icon={<ShieldCheck />} label="Approval" value={job.approval_type === "aramco" ? "Aramco" : "Non-Aramco"} />}
               {job.qm_type && <Detail icon={<ShieldCheck />} label="QM Type" value={job.qm_type} />}
               {job.material && <Detail icon={<Package />} label="Material / Component" value={job.material} />}
               {job.project_name && <Detail icon={<Building2 />} label="Project" value={job.project_name} />}

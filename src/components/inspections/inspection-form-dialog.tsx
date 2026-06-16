@@ -98,6 +98,16 @@ export function InspectionFormDialog({
               </Select>
             </Field>
           </div>
+          <Field label="Approval Type">
+            <Select value={watch("approval_type") || ""} onValueChange={(v) => setValue("approval_type", v as InspectionFormValues["approval_type"])}>
+              <SelectTrigger><SelectValue placeholder="Select — Aramco or Non-Aramco" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="aramco">Aramco (QM approval required)</SelectItem>
+                <SelectItem value="non_aramco">Non-Aramco (material only)</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="QM Type (mechanical approval)">
               <Select value={watch("qm_type") || "none"} onValueChange={(v) => setValue("qm_type", v === "none" ? "" : v)}>

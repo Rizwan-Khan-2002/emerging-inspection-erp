@@ -27,7 +27,11 @@ export default async function PayrollPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Payroll" description={`${period} · Basic + OT + Allowances − Deductions = Net.`}>
-        <AddPayroll employees={employees.map((e) => ({ id: e.id, full_name: e.full_name, basic_salary: e.basic_salary }))} />
+        <AddPayroll employees={employees.map((e) => ({
+          id: e.id, full_name: e.full_name, basic_salary: e.basic_salary,
+          allowances: (e.allow_food ?? 0) + (e.allow_accommodation ?? 0) + (e.allow_telephone ?? 0) + (e.allow_carwash ?? 0),
+          deductions: (e.deduct_fuel ?? 0) + (e.deduct_car_emi ?? 0),
+        }))} />
       </PageHeader>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total Net Payroll" value={formatSAR(total, { compact: true })} icon={<Wallet />} accent />
