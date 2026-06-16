@@ -80,8 +80,8 @@ export function AppShell({
       )}
 
       {/* Background logo watermark */}
-      <div className="pointer-events-none fixed bottom-[-4rem] right-[-4rem] z-0 hidden select-none opacity-[0.035] lg:block">
-        <Image src="/logo.png" alt="" width={520} height={520} className="size-[34rem] object-contain" priority={false} />
+      <div className="app-watermark pointer-events-none fixed bottom-[-3rem] right-[-3rem] z-0 hidden select-none lg:block">
+        <Image src="/logo.png" alt="" width={560} height={560} className="size-[32rem] object-contain" priority={false} />
       </div>
 
       {/* Main column */}

@@ -1,4 +1,5 @@
 import { Globe, Palette, Plug } from "lucide-react";
+import { cookies } from "next/headers";
 import { PageHeader } from "@/components/common/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,16 +8,19 @@ import { ClearData } from "@/components/settings/clear-data";
 import { getCompanySettings } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { normalizeLang } from "@/lib/i18n";
 
 export const metadata = { title: "Settings · Emerging ERP" };
 
 export default async function SettingsPage() {
-  const [company, me] = await Promise.all([getCompanySettings(), getCurrentUser()]);
+  const [company, me, cookieStore] = await Promise.all([getCompanySettings(), getCurrentUser(), cookies()]);
+  const lang = normalizeLang(cookieStore.get("lang")?.value);
+  const aiOn = !!(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY);
   const integrations = [
     { name: "Supabase", desc: "Database, Auth & Storage", on: isSupabaseConfigured },
-    { name: "Claude API", desc: "AI emails, summaries & quotations", on: !!process.env.ANTHROPIC_API_KEY },
+    { name: "AI Emails (Gemini)", desc: "AI-written lead emails & summaries", on: aiOn },
     { name: "Resend", desc: "Transactional email delivery", on: !!process.env.RESEND_API_KEY },
-    { name: "Google Maps", desc: "GPS tracking & site maps", on: !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY },
+    { name: "Field Map (OpenStreetMap)", desc: "GPS-tagged site map — no key needed", on: true },
     { name: "n8n", desc: "Workflow automation", on: !!process.env.N8N_WEBHOOK_URL },
   ];
 
@@ -53,8 +57,9 @@ export default async function SettingsPage() {
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><Globe className="size-4 text-accent" /> Localization</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <Row label="Language" value="English (Arabic — Phase 2)" />
+            <Row label="Language" value={lang === "ar" ? "العربية (RTL) · English" : "English · العربية (toggle in header)"} />
             <Row label="Date format" value="DD MMM YYYY" />
+            <Row label="Currency" value={company.currency ?? "SAR"} />
           </CardContent>
         </Card>
       </div>

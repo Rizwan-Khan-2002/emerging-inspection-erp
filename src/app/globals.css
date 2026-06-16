@@ -88,6 +88,14 @@ html[lang="ar"] body {
   font-family: var(--font-arabic), var(--font-sans);
 }
 
+/* Background brand watermark — clearer on dark, subtle on light. */
+.app-watermark {
+  opacity: 0.08;
+}
+html.light .app-watermark {
+  opacity: 0.04;
+}
+
 /* Subtle industrial backdrop gradient */
 .app-shell-bg {
   background:
