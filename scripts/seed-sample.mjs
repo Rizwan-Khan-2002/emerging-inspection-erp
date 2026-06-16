@@ -115,7 +115,7 @@ async function main() {
   console.log("  ✓ vehicles");
 
   // ---- Inspections (Aramco + QM, and Non-Aramco + material) ----------
-  await upsert("inspections", [
+  const inspections = await upsert("inspections", [
     {
       ref: "INS-2026-0101", type: "mechanical", client_id: aramcoId, site_location: "Abqaiq Plant – Unit 042",
       scheduled_at: iso(today), priority: "high", status: "in_progress",
@@ -135,7 +135,23 @@ async function main() {
       remarks: "Aramco QM-7 NDT — UT thickness survey on storage tank shell.",
     },
   ], "ref");
+  const insByRef = Object.fromEntries(inspections.map((i) => [i.ref, i.id]));
   console.log("  ✓ inspections");
+
+  // ---- Reports (review → approve workflow) ---------------------------
+  await seedIfEmpty("reports", [
+    {
+      inspection_id: insByRef["INS-2026-0101"], status: "pending_review",
+      summary: "Pressure vessel weld inspection complete — 12 welds verified to ASME IX, 1 minor undercut flagged for repair.",
+      submitted_at: iso(today),
+    },
+    {
+      inspection_id: insByRef["INS-2026-0103"], status: "approved",
+      summary: "UT thickness survey on tank shell — all readings within acceptable limits, no corrosion concerns.",
+      submitted_at: iso(new Date(today.getTime() - 86400000)),
+    },
+  ]);
+  console.log("  ✓ reports");
 
   // ---- Payroll for the current period --------------------------------
   await upsert("payroll", [

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusWorkflow } from "@/components/inspections/status-workflow";
 import { Checklist } from "@/components/inspections/checklist";
 import { SubmitReport } from "@/components/inspections/submit-report";
+import { SitePhotos } from "@/components/inspections/site-photos";
 import { INSPECTION_TYPE, PRIORITY } from "@/lib/constants";
 import { getInspectionById } from "@/lib/data";
 import { formatDateTime, mapsUrl } from "@/lib/format";
@@ -50,19 +51,11 @@ export default async function InspectionDetailPage({
           </Card>
 
           <Card>
-            <CardHeader className="flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2"><Camera className="size-4 text-accent" /> Site Photos</CardTitle>
-              <Button variant="secondary" size="sm"><Camera /> Upload</Button>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {[1, 2, 3, 4].map((n) => (
-                  <div key={n} className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-border bg-navy-700 text-steel-dim">
-                    <Camera className="size-5" />
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-xs text-steel-dim">Photo upload connects to Supabase Storage in production.</p>
+              <SitePhotos inspectionId={job.id} initial={job.photos ?? []} />
             </CardContent>
           </Card>
         </div>

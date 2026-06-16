@@ -36,3 +36,35 @@ export async function createInspection(
   revalidatePath("/inspections");
   return { ok: true, ref };
 }
+
+/** Append an uploaded site-photo URL to an inspection's photos array. */
+export async function addInspectionPhoto(
+  id: string, url: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { data, error: readErr } = await sb.from("inspections").select("photos").eq("id", id).single();
+  if (readErr) return { ok: false, error: readErr.message };
+  const photos = Array.isArray(data?.photos) ? (data.photos as string[]) : [];
+  const { error } = await sb.from("inspections").update({ photos: [...photos, url] }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  return { ok: true };
+}
+
+/** Remove a site-photo URL from an inspection's photos array. */
+export async function removeInspectionPhoto(
+  id: string, url: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const sb = await createClient();
+  if (!sb) return { ok: false, error: "No database connection." };
+  const { data, error: readErr } = await sb.from("inspections").select("photos").eq("id", id).single();
+  if (readErr) return { ok: false, error: readErr.message };
+  const photos = Array.isArray(data?.photos) ? (data.photos as string[]) : [];
+  const { error } = await sb.from("inspections").update({ photos: photos.filter((u) => u !== url) }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/inspections/${id}`);
+  return { ok: true };
+}
